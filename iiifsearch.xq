@@ -4,8 +4,7 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 import module namespace response = "http://exist-db.org/xquery/response";
 
-
-import module namespace console="http://exist-db.org/xquery/console";
+import module namespace console="http://exist-db.org/xquery/console" at "java:org.exist.console.xquery.ConsoleModule";
 
 declare option output:method "json";
 declare option output:media-type "application/json";

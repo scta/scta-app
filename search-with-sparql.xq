@@ -8,9 +8,8 @@ declare option output:method "html5";
 declare option output:media-type "text/html";
 
 import module namespace http = "http://expath.org/ns/http-client" at "/http-client/http-client.xq";
+
 declare option exist:serialize "method=html5 media-type=text/html";
-
-
 
 declare function local:getSparqlQuery($expression_type_id) as xs:string {
     (: currently cannot get $expression_type_id passed into query string; so it is currently hard coded to librum1-prologus :)
@@ -18,7 +17,7 @@ let $query := xs:string('
     SELECT ?item ?topLevelExpression
     WHERE
     {
-        ?expression <http://scta.info/property/expressionType> <http://scta.info/resource/librum1-prologus> .
+        ?expression <http://scta.info/property/expressionType> <http://scta.info/resource/' || $expression_type_id || '> .
         ?expression <http://scta.info/property/hasStructureItem> ?item .
         ?item <http://scta.info/property/isPartOfTopLevelExpression> ?topLevelExpression .
 
@@ -74,7 +73,7 @@ for $result in $sparql-result//sparql:result
     let $itemid := $url-array[last()]
     let $url-cid-array := fn:tokenize($result/sparql:binding[@name="topLevelExpression"]/sparql:uri/text(), "/")
     let $cid := $url-cid-array[last()]
-    let $doc := concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $itemid, '.xml') 
+    let $doc := concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $itemid, '.xml')
 
     let $query := request:get-parameter('query', 'quod')
 

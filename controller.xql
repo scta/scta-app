@@ -15,6 +15,16 @@ declare variable $exist:prefix external;
           <add-parameter name="full-msslug" value="{$full-msslug}"/>
         </forward>
       </dispatch>
+
+(:  else if (starts-with($exist:path, '/doc1/')) then
+    let $fragments := tokenize(substring-after($exist:path, '/doc/'), '/')
+    let $expressionid := $fragments[1]
+    return
+      <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+        <forward url="{$exist:controller}/doc/constructor.xq">
+          <add-parameter name="expressionid" value="{$expressionid}"/>
+        </forward>
+      </dispatch> :)
   (: let all other requests through :)
   else
     <ignore xmlns="http://exist.sourceforge.net/NS/exist">

@@ -1,5 +1,7 @@
 xquery version "3.0";
 
+import module namespace console="http://exist-db.org/xquery/console" at "java:org.exist.console.xquery.ConsoleModule";
+
 (:import module namespace console="http://exist-db.org/xquery/console" at "java:org.exist.console.xquery.ConsoleModule";:)
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -41,8 +43,8 @@ let $docs :=
                     if ($transcription) then
                         (
                         doc(concat('/db/apps/scta-data/', $commentaryid, '/', $itemid, '/', $transcription))
-                        
-(:                        console:log(concat('transcription found: /db/apps/scta-data/', $commentaryid, '/', $itemid, '/', $transcription)):)
+                        ,                      
+                        console:log(concat('transcription found: /db/apps/scta-data/', $commentaryid, '/', $itemid, '/', $transcription))
                         )
                     else
                         (
