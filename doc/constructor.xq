@@ -13,19 +13,27 @@ declare function local:getSparqlQuery($expression_id as xs:string) as xs:string 
   WHERE
   {
       <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/structureType> ?type .
+      #option for top level collection expression
       OPTIONAL
       {
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/level> ?level .
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/hasStructureItem> ?item .
       }
+      #option for non top level collection
       OPTIONAL
       {
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/hasStructureItem> ?item .
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/isPartOfTopLevelExpression> ?topLevelExpression .
       }
+      # option for division or block
       OPTIONAL
       {
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/isPartOfStructureItem> ?item .
+        <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/isPartOfTopLevelExpression> ?topLevelExpression .
+      }
+      #option for structureItem
+      OPTIONAL
+      {
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/isPartOfTopLevelExpression> ?topLevelExpression .
       }
   }
@@ -34,7 +42,7 @@ declare function local:getSparqlQuery($expression_id as xs:string) as xs:string 
 };
 
 (: main query :)
-let $expression_id := request:get-parameter('expressionid', 'plaoulcommentary')
+let $expression_id := request:get-parameter('expressionid', 'lectio1')
 let $url := "http://sparql-staging.scta.info/ds/query?query=",
 $sparql := local:getSparqlQuery($expression_id),
 $encoded-sparql := encode-for-uri($sparql),
