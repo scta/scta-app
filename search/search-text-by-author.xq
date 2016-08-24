@@ -11,16 +11,15 @@ import module namespace http = "http://expath.org/ns/http-client" at "/http-clie
 
 declare option exist:serialize "method=html5 media-type=text/html";
 
-declare function local:getSparqlQuery($expression_type_id) as xs:string {
+declare function local:getSparqlQuery($author_short_id) as xs:string {
     (: currently cannot get $expression_type_id passed into query string; so it is currently hard coded to librum1-prologus :)
 let $query := xs:string('
     SELECT ?item ?topLevelExpression
     WHERE
     {
-        ?expression <http://scta.info/property/expressionType> <http://scta.info/resource/' || $expression_type_id || '> .
-        ?expression <http://scta.info/property/hasStructureItem> ?item .
-        ?item <http://scta.info/property/isPartOfTopLevelExpression> ?topLevelExpression .
-
+        ?topLevelExpression <http://www.loc.gov/loc.terms/relators/AUT>	<http://scta.info/resource/' || $author_short_id || '> .
+        ?topLevelExpression <http://scta.info/property/level> "1" .
+        ?topLevelExpression <http://scta.info/property/hasStructureItem> ?item .
     }
     ')
     return $query
@@ -48,9 +47,9 @@ declare function local:recurse($node) {
 };
 
 (: main query :)
-let $expression_type_id := request:get-parameter('expressionid', '')
+let $author_short_id := request:get-parameter('authorid', 'Aquinas')
 let $url := "http://sparql-staging.scta.info/ds/query?query=",
-$sparql := local:getSparqlQuery($expression_type_id),
+$sparql := local:getSparqlQuery($author_short_id),
 $encoded-sparql := encode-for-uri($sparql),
 
 $sparql-result := http:send-request(

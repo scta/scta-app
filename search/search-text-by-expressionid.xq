@@ -33,7 +33,7 @@ declare function local:recurse($node) {
 (: main :)
 let $start-time := util:system-time()
 let $q := request:get-parameter('query', '')
-let $commentaryid := request:get-parameter('commentaryid', 'all')
+let $commentaryid := request:get-parameter('expressionid', 'plaoulcommentary')
 let $docs :=
     if ($commentaryid = "all") then
         for $commentaryid in xmldb:get-child-collections('/db/apps/scta-data/')
@@ -43,13 +43,13 @@ let $docs :=
                     if ($transcription) then
                         (
                         doc(concat('/db/apps/scta-data/', $commentaryid, '/', $itemid, '/', $transcription))
-                        ,                      
+                        ,
                         console:log(concat('transcription found: /db/apps/scta-data/', $commentaryid, '/', $itemid, '/', $transcription))
                         )
                     else
                         (
                         doc(concat('/db/apps/scta-data/', $commentaryid, '/', $itemid, '/', $itemid, '.xml'))
-                        
+
 (:                        console:log(concat('use canonical: /db/apps/scta-data/', $commentaryid, '/', $itemid, '/', $itemid, '.xml')):)
                         )
     else
@@ -59,13 +59,13 @@ let $docs :=
                 if ($transcription) then
                     (
                     doc(concat('/db/apps/scta-data/', $commentaryid, '/', $collection, '/', $transcription))
-                    
+
 (:                    console:log(concat('transcription found: /db/apps/scta-data/', $commentaryid, '/', $collection, '/', $transcription)):)
                     )
                 else
                     (
                     doc(concat('/db/apps/scta-data/', $commentaryid, '/', $collection, '/', $collection, '.xml'))
-                    
+
 (:                    console:log(concat('use canonical: /db/apps/scta-data/', $commentaryid, '/', $collection, '/', $collection, '.xml')):)
                     )
 
