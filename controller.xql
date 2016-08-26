@@ -17,12 +17,11 @@ declare variable $exist:prefix external;
       </dispatch>
 
   else if (starts-with($exist:path, '/document/')) then
-    let $fragments := tokenize(substring-after($exist:path, '/document/'), '/')
-    let $expressionid := $fragments[1]
+    let $transcriptionid := substring-after($exist:path, '/document/')
     return
       <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
         <forward url="{$exist:controller}/doc/constructor.xq">
-          <add-parameter name="expressionid" value="{$expressionid}"/>
+          <add-parameter name="transcriptionid" value="{$transcriptionid}"/>
         </forward>
       </dispatch>
   else if (starts-with($exist:path, '/search/author/')) then
