@@ -46,8 +46,8 @@ declare function local:getSparqlQuery($transcription_id as xs:string) as xs:stri
 let $transcription_id := request:get-parameter('transcriptionid', 'plaoulcommentary/vat/transcription')
 let $fragments := tokenize($transcription_id, "/")
 let $expression_short_id := $fragments[1]
-(: let $url := "http://sparql-staging.scta.info/ds/query?query=", :)
-let $url := "http://localhost:3030/ds/query?query=",
+let $url := "http://sparql-staging.scta.info/ds/query?query=",
+(: let $url := "http://localhost:3030/ds/query?query=", :)
 $sparql := local:getSparqlQuery($transcription_id),
 $encoded-sparql := encode-for-uri($sparql),
 
