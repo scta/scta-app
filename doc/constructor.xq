@@ -42,6 +42,8 @@ declare function local:getSparqlQuery($transcription_id as xs:string) as xs:stri
     return $query
 };
 
+let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
+
 (: main query :)
 let $transcription_id := request:get-parameter('transcriptionid', 'plaoulcommentary/vat/transcription')
 let $fragments := tokenize($transcription_id, "/")
