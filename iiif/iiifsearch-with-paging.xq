@@ -34,34 +34,13 @@ declare function local:recurse($node) {
 
 let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 
-let $q := request:get-parameter('q', '')
+let $q := request:get-parameter('q', 'fides')
 let $searchuri := request:get-uri()
 (: full-msslug should be able to be parsed from requesting url :)
-let $full-msslug : = request:get-parameter('full-msslug', 'pp-sorb')
-let $msslug := tokenize($full-msslug, '-')[last()]
-let $commentaryslug := tokenize($full-msslug, '-')[1]
+let $manifestationid := request:get-parameter('manifestationid', 'plaoulcommentary/sorb')
 
-(:  this is temporary and should be replace by a sparql query or an mapping document in exist :)
-let $commentaryid :=
-    if ($commentaryslug eq 'pp')
-        then "plaoulcommentary"
-    else if ($commentaryslug = 'pg')
-        then "graciliscommentary"
-    else if ($commentaryslug = 'wdr')
-        then "rothwellcommentary"
-    else if ($commentaryslug = 'pl')
-        then "lombardsententia"
-    else if ($commentaryslug = 'aw')
-        then "wodehamordinatio"
-    else if ($commentaryslug = 'atv')
-        then "vargascommentary"
-    else if ($commentaryslug = 'nddm')
-        then "dinkelsbuhllectura"
-    else if ($commentaryslug = 'ta') 
-        then "aquinasscriptum"
-    else
-        "plaoulcommentary"
-(: end slug to id mapping :)
+let $msslug := tokenize($manifestationid, '/')[last()]
+let $commentaryid := tokenize($manifestationid, '/')[1]
 
 let $docs := if (collection(concat('/db/apps/scta-data/', $commentaryid))[contains(util:document-name(.), $msslug)])
                 then
@@ -165,7 +144,7 @@ return
             (: needs to make adjustments if hit occurs in zone 1 or 2 or 3, etc
             currently it just defaults to the first zone :)
             let $zone := $hit/preceding::tei:zone[@start=concat("#", $pid)][1]
-            let $sctacanvasbase := concat("http://scta.info/iiif/", $full-msslug, "/canvas/")
+            let $sctacanvasbase := concat("http://scta.info/iiif/", tokenize($manifestationid, "/")[last()], "/canvas/")
 
             (:this is a real mess
             but I'm going to explain what's happening
@@ -233,7 +212,7 @@ return
             return
 
                     map {
-                        "@id": concat("http://scta.info/iiif/", $full-msslug, "/search/annotations/", $pid),
+                        "@id": concat("http://scta.info/iiif/", $manifestationid, "/search/annotations/", $pid),
                         "@type": "oa:Annotation",
                         "motivation": "sc:painting",
                         "resource":
