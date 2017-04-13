@@ -16,7 +16,7 @@ declare function local:getSparqlQuery($surface) as xs:string {
           ?manifestation_item <http://scta.info/property/hasSurface> <http://scta.info/resource/sorb/2r> .
           ?manifestation_item <http://scta.info/property/shortId> ?short_id .
       }
-     
+
   return $query
   }
 

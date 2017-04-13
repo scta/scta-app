@@ -6,7 +6,6 @@ declare namespace sparql = "http://www.w3.org/2005/sparql-results#";
 
 import module namespace http = "http://expath.org/ns/http-client" at "/http-client/http-client.xq";
 
-
 declare function local:getSparqlQuery($transcription_id as xs:string) as xs:string {
   let $query := xs:string('
   SELECT ?type ?item ?topLevelTranscription ?level

@@ -34,35 +34,35 @@ declare function local:recurse($node) {
 let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 
 let $q := request:get-parameter('q', '')
-let $searchuri := request:get-uri() 
+let $searchuri := request:get-uri()
 (: full-msslug should be able to be parsed from requesting url :)
 let $full-msslug : = request:get-parameter('full-msslug', 'pp-sorb')
-let $msslug := tokenize($full-msslug, '-')[last()] 
-let $commentaryslug := tokenize($full-msslug, '-')[1] 
+let $msslug := tokenize($full-msslug, '-')[last()]
+let $commentaryslug := tokenize($full-msslug, '-')[1]
 
 (:  this is temporary and should be replace by a sparql query or an mapping document in exist :)
-let $commentaryid := 
-    if ($commentaryslug eq 'pp') 
+let $commentaryid :=
+    if ($commentaryslug eq 'pp')
         then "plaoulcommentary"
-    else if ($commentaryslug = 'pg') 
+    else if ($commentaryslug = 'pg')
         then "graciliscommentary"
-    else if ($commentaryslug = 'wdr') 
+    else if ($commentaryslug = 'wdr')
         then "rothwellcommentary"
-    else if ($commentaryslug = 'pl') 
+    else if ($commentaryslug = 'pl')
         then "lombardsententia"
-    else if ($commentaryslug = 'aw') 
+    else if ($commentaryslug = 'aw')
         then "wodehamordinatio"
-    else if ($commentaryslug = 'atv') 
+    else if ($commentaryslug = 'atv')
         then "vargascommentary"
-    else if ($commentaryslug = 'nddm') 
+    else if ($commentaryslug = 'nddm')
         then "dinkelsbuhllectura"
-    else if ($commentaryslug = 'ta') 
+    else if ($commentaryslug = 'ta')
         then "aquinasscriptum"
-    else 
+    else
         "plaoulcommentary"
 (: end slug to id mapping :)
 
-let $docs := if (collection(concat('/db/apps/scta/', $commentaryid))[contains(util:document-name(.), $msslug)]) 
+let $docs := if (collection(concat('/db/apps/scta/', $commentaryid))[contains(util:document-name(.), $msslug)])
                 then
                 collection(concat('/db/apps/scta/', $commentaryid))[contains(util:document-name(.), $msslug)]
                 else
@@ -72,10 +72,10 @@ let $docs := if (collection(concat('/db/apps/scta/', $commentaryid))[contains(ut
 let $hits := $docs//tei:p[ft:query(., $q)]
 
 return
-    
+
         map{
           "@context":"http://iiif.io/api/search/0/context.json",
-          "@id": concat($searchuri, "?q=", $q), 
+          "@id": concat($searchuri, "?q=", $q),
           "@type":"sc:AnnotationList",
           "resources":
             for $hit in $hits
@@ -86,36 +86,36 @@ return
             let $itemid := $hit/ancestor::tei:body/tei:div/@xml:id/string()
             let $itemtitle := $hit/preceding::tei:titleStmt/tei:title/string()
             let $bibl := $hit/following-sibling::tei:bibl
-            (: needs to make adjustments if hit occurs in zone 1 or 2 or 3, etc 
+            (: needs to make adjustments if hit occurs in zone 1 or 2 or 3, etc
             currently it just defaults to the first zone :)
             let $zone := $hit/preceding::tei:zone[@start=concat("#", $pid)][1]
             let $sctacanvasbase := concat("http://scta.info/iiif/", $full-msslug, "/canvas/")
-            
-            (:this is a real mess 
-            but I'm going to explain what's happening 
-            so that it can be refactored when I get help 
-            
+
+            (:this is a real mess
+            but I'm going to explain what's happening
+            so that it can be refactored when I get help
+
             The canvas id is looking first to see if there is zone with coordinates; if so its going to use this to build an scta canvas id -- this needs to be altered to allow for holding library canvas ids
-            
+
             Then it checks to see if there is a preceding column break or a preceding page break.
-            If there is it then to check to see if the cb or pb element has a select attribute 
-            
-            if it does it goes up to the witness with the corresponding xml:base and concats this value with the value of the @select attribute 
-            
+            If there is it then to check to see if the cb or pb element has a select attribute
+
+            if it does it goes up to the witness with the corresponding xml:base and concats this value with the value of the @select attribute
+
             if there is not @select attribute it will create a default scta canvasid
-            
-            Finally if there is not preecding it needs to find the folio that it starts on. 
-            
-            One way to do this is the find the following cb or pb element and then calculate back to the previous one. 
-            
+
+            Finally if there is not preecding it needs to find the folio that it starts on.
+
+            One way to do this is the find the following cb or pb element and then calculate back to the previous one.
+
             Right now its only doing the first step, and its only defaulting to scta canvasds.
-            
-            This may become obsolete now that I have adopted the practice of including a "startsOn" section in the front part of each document. 
-            
+
+            This may become obsolete now that I have adopted the practice of including a "startsOn" section in the front part of each document.
+
             But I have not done this is a widespread way yet, so it only work for a very few text and should therefore not be implemented yet.
-            
+
             :)
-            let $canvasid := if ($zone) then 
+            let $canvasid := if ($zone) then
                                 concat($sctacanvasbase, $zone/parent::tei:surface/@n/string())
                             else if ($hit/preceding::tei:cb[@ed=$msInitialPointer][1]) then
                                 if ($hit/preceding::tei:cb[@ed=$msInitialPointer][1]/@select) then
@@ -123,12 +123,12 @@ return
                                 else
                                     concat($sctacanvasbase, $hit/preceding::tei:witness[@xml:id=substring-after($hit/preceding::tei:cb[1]/@ed, "#")], substring($hit/preceding::tei:cb[@ed=$msInitialPointer][1]/@n, 1, string-length($hit/preceding::tei:cb[1]/@n) - 1))
                             else if ($hit/preceding::tei:pb[@ed=$msInitialPointer][1]) then
-                                if ($hit/preceding::tei:pb[@ed=$msInitialPointer][1]/@select) then 
+                                if ($hit/preceding::tei:pb[@ed=$msInitialPointer][1]/@select) then
                                     concat($hit/preceding::tei:witness[@xml:id=substring-after($hit/preceding::tei:pb[@ed=$msInitialPointer][1]/@ed, "#")]/@xml:base, $hit/preceding::tei:pb[@ed=$msInitialPointer][1]/@select)
                                 else
                                     concat($sctacanvasbase, substring-after($hit/preceding::tei:pb[@ed=$msInitialPointer][1]/@ed, "#"), $hit/preceding::tei:pb[@ed=$msInitialPointer][1]/@n)
-                            
-                            
+
+
                             (: below steps need work :)
                             else if ($hit/following::tei:cb[@ed=$msInitialPointer][1]) then
                                 (: but this will be 1 on off                                :)
@@ -140,36 +140,34 @@ return
                                 concat($sctacanvasbase, substring-after($hit/following::tei:pb[@ed=$msInitialPointer][1]/@ed, "#"), $hit/preceding::tei:pb[@ed=$msInitialPointer][1]/@n)
                             else
                                 concat($sctacanvasbase, substring-after($hit/following::tei:pb[@ed=$msInitialPointer][1]/@ed, "#"), $hit/preceding::tei:pb[@ed=$msInitialPointer][1]/@n)
-                                
-                                
+
+
             let $ulx := $zone/@ulx
             let $uly := $zone/@uly
             let $lrx := $zone/@lrx
             let $lry := $zone/@lry
             let $width :=  $lrx - $ulx
-            let $height := $lry - $uly 
-            let $on := if ($zone) then 
+            let $height := $lry - $uly
+            let $on := if ($zone) then
                         concat($canvasid, "#xywh=", $ulx, ",", $uly, ",", $width, ",", $height)
-                        
+
                         else
                         $canvasid
-                        
-            return 
-                
-                    map { 
+
+            return
+
+                    map {
                         "@id": concat("http://scta.info/iiif/", $full-msslug, "/search/annotations/", $pid),
                         "@type": "oa:Annotation",
                         "motivation": "sc:painting",
-                        "resource": 
+                        "resource":
                             map {
                                 "@type": "cnt:ContentAsText",
                                 "chars": local:render(util:expand($hit))
                             },
                         "on": $on
                     }
-                
-        
-            
+
+
+
         }
-    
-        

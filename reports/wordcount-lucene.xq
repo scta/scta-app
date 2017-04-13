@@ -6,11 +6,11 @@ declare option exist:serialize "method=html media-type=text/html ident=no";
 
 let $commentaryid := request:get-parameter('commentaryid', '')
 let $collection := concat("scta", "/", $commentaryid)
-let $terms := 
+let $terms :=
     <terms>
         {
             util:index-keys(
-                collection(concat("/db/apps/", $collection))//tei:p, 
+                collection(concat("/db/apps/", $collection))//tei:p,
                 "",
                 function($key, $count) {
                     <term name="{$key}" count="{$count[1]}"
@@ -20,15 +20,15 @@ let $terms :=
     </terms>
 
 let $sum := sum($terms//@count)
-return 
+return
     <html>
         <head>
-            
+
         </head>
         <body>
             <div style="background-color: lightgray; border-bottom: 2px solid black; padding: 10px;">
                 <h1>SCTA Statistics</h1>
-                <h2>Frequency analysis for {$collection}</h2> 
+                <h2>Frequency analysis for {$collection}</h2>
                 <h3>Total word count: {xs:decimal(xs:double($sum))}</h3>
             </div>
             <table style="padding: 10px;">
@@ -39,12 +39,12 @@ return
                 </tr>
                 {
                     for $term in $terms//term
-                        
+
                         let $frequency := xs: integer($term/@count/string())
                         let $percentage := format-number(($term/@count div $sum), "%.00")
                         order by $frequency descending
                         return
-                        
+
                             <tr style="padding: 2px;">
                                 <td>{$term/@name/string()}</td>
                                 <td>{$frequency}</td>
@@ -54,10 +54,3 @@ return
                 </table>
                 </body>
                 </html>
-                
-                
-                
-    
-
-
-

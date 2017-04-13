@@ -7,7 +7,6 @@ import module namespace console="http://exist-db.org/xquery/console" at "java:or
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
-
 declare option output:method "html5";
 declare option output:media-type "text/html";
 
@@ -43,8 +42,7 @@ let $docs :=
                     if ($transcription) then
                         (
                         doc(concat('/db/apps/scta-data/', $commentaryid, '/', $itemid, '/', $transcription))
-                        ,
-                        console:log(concat('transcription found: /db/apps/scta-data/', $commentaryid, '/', $itemid, '/', $transcription))
+                        (: console:log(concat('transcription found: /db/apps/scta-data/', $commentaryid, '/', $itemid, '/', $transcription)) :)
                         )
                     else
                         (

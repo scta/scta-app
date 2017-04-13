@@ -9,20 +9,20 @@ declare option output:method "html5";
 declare option output:media-type "text/html";
 
 let $commentaryid := request:get-parameter('commentaryid', 'lombardsententia')
-let $docs := 
+let $docs :=
     for $collection in xmldb:get-child-collections(concat('/db/apps/scta/', $commentaryid))
 
 (: main query :)
 for $collection in xmldb:get-child-collections(concat('/db/apps/scta/', $commentaryid))
         let $transcription := doc(concat('/db/apps/scta/', $commentaryid, '/', $collection, '/transcriptions.xml'))/transcriptions/transcription
         return
-            if ($transcription) then 
+            if ($transcription) then
                 (
                 doc(concat('/db/apps/scta/', $commentaryid, '/', $collection, '/', $transcription))
                 ,
                 console:log(concat('transcription found: /db/apps/scta/', $commentaryid, '/', $collection, '/', $transcription))
                 )
-            else 
+            else
                 (
                 doc(concat('/db/apps/scta/', $commentaryid, '/', $collection, '/', $collection, '.xml'))
                 ,
@@ -39,15 +39,13 @@ return
         let $itemid := $hit/ancestor::tei:body/tei:div/@xml:id/string()
         let $itemtitle := $hit/preceding::tei:titleStmt/tei:title/string()
         let $bibl := $hit/following-sibling::tei:bibl
-        
-        return 
+
+        return
             <div style="border-bottom: 1px dotted gray; margin-bottom: 3px; padding: 3px;">
-            <h3>Quote from paragraph {$pid}, item {$itemid}, {$itemtitle}</h3>    
+            <h3>Quote from paragraph {$pid}, item {$itemid}, {$itemtitle}</h3>
             <p>{$hit}</p>
             <p style="font: 10px">{$bibl}</p>
-            
+
             </div>
         }
     </div>
-
-

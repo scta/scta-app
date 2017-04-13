@@ -17,7 +17,7 @@ declare function local:render($node) {
         case element (tei:note) return ()
         default return local:recurse($node)
 };
- 
+
 declare function local:recurse($node) {
     for $child in $node/node()
     return
@@ -36,7 +36,7 @@ let $minutes := minutes-from-duration($duration)
 let $seconds := seconds-from-duration($duration)
 return
     <div class="searchresults">
-        <p>{count($hits)} results found for '{$q}' in 
+        <p>{count($hits)} results found for '{$q}' in
             {
             string-join(
                 (
@@ -52,10 +52,10 @@ return
         let $pid := $hit/@xml:id/string()
         let $itemid := $hit/ancestor::tei:body/tei:div/@xml:id/string()
         let $itemtitle := $hit/preceding::tei:titleStmt/tei:title/string()
-        
-        return 
+
+        return
             <div>
-            <p><a href="/text/{$itemid}#{$pid}">{$itemtitle}, paragraph {$pid}</a></p>    
+            <p><a href="/text/{$itemid}#{$pid}">{$itemtitle}, paragraph {$pid}</a></p>
             <p>{local:render(util:expand($hit))}</p>
             </div>
         }

@@ -14,9 +14,9 @@ let $query := xs:string('
     WHERE
     {
         ?item <http://scta.info/property/mentions> <http://scta.info/resource/person/Holcot> .
-    } 
+    }
     '
-    ) 
+    )
     return $query
 };
 
@@ -29,7 +29,7 @@ declare function local:getHtml($sparql-result as node()) {
             <ul>
             {
                 for $result in $sparql-result//sparql:result
-                    
+
                     let $url-array := fn:tokenize($result/sparql:binding/sparql:uri/text(), "/"),
                     $itemid := $url-array[last()],
                     $cid : = $url-array[5]
@@ -52,4 +52,3 @@ $sparql-result := http:send-request(
 )
 return local:getHtml($sparql-result[2])
 (:return $sparql-result  :)
-

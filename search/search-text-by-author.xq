@@ -88,3 +88,4 @@ for $result in $sparql-result//sparql:result
             <p><a href="/text/{$itemid}#{$pid}">{$itemtitle}, paragraph {$pid}</a> by {$itemauthor}</p>
             <p>{local:render(util:expand($hit))}</p>
             </div>
+              

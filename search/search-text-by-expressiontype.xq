@@ -27,7 +27,6 @@ let $query := xs:string('
 };
 
 
-
 declare function local:render($node) {
     typeswitch($node)
         case text() return concat($node, ' ')

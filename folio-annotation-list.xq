@@ -40,7 +40,7 @@ let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 
 (: main query :)
 let $surface_id := request:get-parameter('surface_id', 'http://scta.info/resource/wettf15/108r')
-let $url := "http://localhost:3030/ds/query?query=",
+let $url := "http://sparql-staging.scta.info/ds/query?query=",
 $sparql := local:getSparqlQuery($surface_id),
 $encoded-sparql := encode-for-uri($sparql),
 
@@ -79,7 +79,6 @@ for $result at $count in $sparql-result//sparql:result
   let $next_surface_title := $result//sparql:binding[@name="next_surface_title"]/sparql:literal/text()
   let $surface_number_start := concat($surface_title, "a")
   let $surface_number_end := concat($next_surface_title, "a")
-
   let $initial := if ($doc//tei:witness/@n=$prefix) then
       $doc//tei:witness[@n=$prefix]/@xml:id
      else

@@ -30,7 +30,6 @@ for $item-id in subsequence($repo-profile//item-id, 3, 1)
 let $remotePath := concat('https://bitbucket.org/jeffreycwitt/', lower-case($item-id), '.git')
 let $localPath := concat('/db/apps/scta/', $commentary-id, '/', $item-id, '/')
 let $username := 'lbpuser'
-let $password := 'plaoulRepo' 
+let $password := 'plaoulRepo'
 return
     git:pull($remotePath, $localPath, $username, $password)
-
