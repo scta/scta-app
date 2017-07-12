@@ -26,20 +26,21 @@ declare function local:getSparqlQuery($surface_id) as xs:string {
         }
         ?isurface <http://scta.info/property/hasCanvas> ?canvas .
         ?manifestation_item <http://scta.info/property/hasSurface> <' || $surface_id || '> .
+        ?manifestation_item <http://scta.info/property/structureType> <http://scta.info/resource/structureItem> .
         ?manifestation_item <http://scta.info/property/shortId> ?short_id .
         ?manifestation_item <http://scta.info/property/isManifestationOf> ?expression_item .
         ?expression_item <http://scta.info/property/isPartOfTopLevelExpression> ?topLevelExpression .
         ?topLevelExpression <http://scta.info/property/shortId> ?topLevelExpression_short_id .
-  }
+    }
       ')
       return $query
-  };
+};
 
 (: set response header :)
 let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 
 (: main query :)
-let $surface_id := request:get-parameter('surface_id', 'http://scta.info/resource/wettf15/108r')
+let $surface_id := request:get-parameter('surface_id', 'http://scta.info/resource/sorb/20r')
 let $url := "http://sparql-staging.scta.info/ds/query?query=",
 $sparql := local:getSparqlQuery($surface_id),
 $encoded-sparql := encode-for-uri($sparql),
@@ -51,9 +52,10 @@ $sparql-result := http:send-request(
 )
 
 return
+
     map{
         "@context": "http://iiif.io/api/presentation/2/context.jsonld",
-        "@id": "http://scta.info/iiif/test/list/",
+        "@id": "http://exist.scta.info/exist/apps/scta-app/folio-annotation-list.xq?surface_id=" || $surface_id,
         "@type": "sc:AnnotationList",
         "within": map {
           "@id": "http://scta.info/iiif/sorb/layer/transcription",
@@ -75,6 +77,8 @@ for $result at $count in $sparql-result//sparql:result
 
   (: this is extremely fragile; if the label isn't right this won't work
   if the econding in lbp-schema 1.0 this won't work :)
+  (: need a switch here to handle lbp-1.0 guidlines and 0.0 guidelines as well
+  as cases where there are no column breaks and only page breaks :)
   let $surface_title := $result//sparql:binding[@name="surface_title"]/sparql:literal/text()
   let $next_surface_title := $result//sparql:binding[@name="next_surface_title"]/sparql:literal/text()
   let $surface_number_start := concat($surface_title, "a")
