@@ -17,7 +17,9 @@ declare function local:render($node) {
         case element(tei:corr) return ()
         case element(tei:reg) return ()
         case element(tei:note) return ()
-        case element(tei:lb) return "<br/>"
+        case element(tei:lb) return "<br/> * "
+        case element(tei:cb) return "<br/> [column break] "
+        case element(tei:pb) return "<br/> [page break] "
         case element(tei:head) return ()
         default return local:recurse($node)
 };
