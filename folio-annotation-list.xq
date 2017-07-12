@@ -11,6 +11,22 @@ declare option output:media-type "application/json";
 import module namespace response = "http://exist-db.org/xquery/response";
 import module namespace http = "http://expath.org/ns/http-client" at "/http-client/http-client.xq";
 
+declare function local:render($node) {
+    typeswitch($node)
+        case text() return concat(normalize-space($node), " ")
+        case element(tei:corr) return ()
+        case element(tei:reg) return ()
+        case element(tei:note) return ()
+        case element(tei:lb) return "<br/>"
+        case element(tei:head) return ()
+        default return local:recurse($node)
+};
+
+declare function local:recurse($node) {
+    for $child in $node/node()
+    return
+        local:render($child)
+};
 
 declare function local:getSparqlQuery($surface_id) as xs:string {
   let $query := xs:string('
@@ -102,7 +118,7 @@ for $result at $count in $sparql-result//sparql:result
   let $display-root-namespace := true()
   let $fragment := util:get-fragment-between($beginning-node, $ending-node, $make-fragment, $display-root-namespace)
   let $node := util:parse($fragment)
-  let $current_offset := ($count * 200) + 100
+  let $current_offset := ($count * 200) + 10
 
   return
 
@@ -114,11 +130,11 @@ for $result at $count in $sparql-result//sparql:result
                   "resource": map {
                       "@id": "http://scta.lombardpress.org/text/plaintext/"|| $prefix ||"/"|| $surface_title ||"/transcription/" || $count,
                       "@type": "dctypes:Text",
-                      "chars": $node/string(),
+                      "chars": string-join(local:render($node)),
                       "format": "text/html",
                       "label": $fs
                   },
-          "on": $canvasid || "#xywh=1000,"|| $current_offset ||",300,100"
+          "on": $canvasid || "#xywh=0,"|| $current_offset ||",300,200"
 
               }
 
