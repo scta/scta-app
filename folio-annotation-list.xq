@@ -99,23 +99,68 @@ for $result at $count in $sparql-result//sparql:result
   as cases where there are no column breaks and only page breaks :)
   let $surface_title := $result//sparql:binding[@name="surface_title"]/sparql:literal/text()
   let $next_surface_title := $result//sparql:binding[@name="next_surface_title"]/sparql:literal/text()
-  let $surface_number_start := concat($surface_title, "a")
-  let $surface_number_end := concat($next_surface_title, "a")
+  let $schema := if ($doc/tei:TEI/tei:teiHeader[1]/tei:encodingDesc[1]/tei:schemaRef[1]/@n) then (
+    string($doc/tei:TEI/tei:teiHeader[1]/tei:encodingDesc[1]/tei:schemaRef[1]/@n)
+    )
+    else(
+      "lbp-diplomatic-0.0.0"
+    )
+  let $surface_number_start := if ($schema eq "lbp-diplomatic-0.0.0") then (
+    concat($surface_title, "a")
+  )
+  else (
+    if (contains($surface_title, "r")) then (
+      concat(substring-before($surface_title, "r"), "-r")
+    )
+    else if (contains($surface_title, "v")) then (
+      concat(substring-before($surface_title, "v"), "-v")
+    )
+    else()
+  )
+  let $surface_number_end := if ($schema eq "lbp-diplomatic-0.0.0") then (
+    concat($next_surface_title, "a")
+    )
+    else (
+      if (contains($next_surface_title, "r")) then (
+        concat(substring-before($next_surface_title, "r"), "-r")
+      )
+      else if (contains($next_surface_title, "v")) then (
+        concat(substring-before($next_surface_title, "v"), "-v")
+      )
+      else()
+    )
+
+
   let $initial := if ($doc//tei:witness/@n=$prefix) then
       $doc//tei:witness[@n=$prefix]/@xml:id
      else
       upper-case(substring($prefix,1,1))
   let $initial_with_hash := concat("#", $initial)
 
-  let $beginning-node := if ($doc/tei:TEI//tei:body//tei:cb[@ed=$initial_with_hash][@n=$surface_number_start]) then
-      $doc/tei:TEI//tei:cb[@ed=$initial_with_hash][@n=$surface_number_start]
+  let $beginning-node := if ($schema eq "lbp-diplomatic-0.0.0") then (
+      if ($doc/tei:TEI//tei:body//tei:cb[@ed=$initial_with_hash][@n=$surface_number_start]) then
+        $doc/tei:TEI//tei:body//tei:cb[@ed=$initial_with_hash][@n=$surface_number_start]
+      else
+        $doc/tei:TEI//tei:body/tei:div
+      )
+      else(
+        if ($doc/tei:TEI//tei:body//tei:pb[@ed=$initial_with_hash][@n=$surface_number_start]) then
+          $doc/tei:TEI//tei:body//tei:pb[@ed=$initial_with_hash][@n=$surface_number_start]
+        else
+          $doc/tei:TEI//tei:body/tei:div
+      )
+  let $ending-node := if ($schema eq "lbp-diplomatic-0.0.0") then (
+    if ($doc/tei:TEI//tei:body//tei:cb[@ed=$initial_with_hash][@n=$surface_number_end]) then
+      $doc/tei:TEI//tei:body//tei:cb[@ed=$initial_with_hash][@n=$surface_number_end]
     else
-      $doc/tei:TEI//tei:body/tei:div
-  let $ending-node := if ($doc/tei:TEI//tei:body//tei:cb[@ed=$initial_with_hash][@n=$surface_number_end]) then
-      $doc/tei:TEI//tei:cb[@ed=$initial_with_hash][@n=$surface_number_end]
-    else
-      $doc/tei:TEI//tei:cb[@ed=$initial_with_hash][@n=$surface_number_start]//following
-
+      $doc/tei:TEI//tei:body//tei:cb[@ed=$initial_with_hash][@n=$surface_number_start]//following
+    )
+    else(
+      if ($doc/tei:TEI//tei:body//tei:pb[@ed=$initial_with_hash][@n=$surface_number_end]) then
+        $doc/tei:TEI//tei:body//tei:pb[@ed=$initial_with_hash][@n=$surface_number_end]
+      else
+        $doc/tei:TEI//tei:body//tei:pb[@ed=$initial_with_hash][@n=$surface_number_start]//following
+    )
   let $make-fragment := true()
   let $display-root-namespace := true()
   let $fragment := util:get-fragment-between($beginning-node, $ending-node, $make-fragment, $display-root-namespace)
@@ -134,7 +179,8 @@ for $result at $count in $sparql-result//sparql:result
                       "@type": "dctypes:Text",
                       "chars": string-join(local:render($node)),
                       "format": "text/html",
-                      "label": $fs
+                      "label": $fs,
+                      "end": $next_surface_title
                   },
           "on": $canvasid || "#xywh=0,"|| $current_offset ||",300,200"
 
