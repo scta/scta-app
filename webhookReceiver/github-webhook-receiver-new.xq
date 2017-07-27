@@ -2,8 +2,11 @@ xquery version "3.1";
 declare namespace functx = "http://www.functx.com";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace sparql = "http://www.w3.org/2005/sparql-results#";
+
+import module namespace gitarc = "http://joewiz.org/ns/xquery/gitarc" at "get-github-zip-archive.xq";
 import module namespace xmldb="http://exist-db.org/xquery/xmldb";
 import module namespace http="http://expath.org/ns/http-client";
+import module namespace console="http://exist-db.org/xquery/console";
 
 
 declare function local:topLevelCollectionQuery($shortid as xs:string){
@@ -35,6 +38,26 @@ declare function local:topLevelCollectionQuery($shortid as xs:string){
           let $top_level_expression_short_id := $result//sparql:binding[@name="top_level_expression_short_id"]/sparql:literal/text()
           return $top_level_expression_short_id
   };
+
+declare function local:replaceCollection($owner, $repo, $access_token) {
+    (: these two lines could become their own function so that other apis like bitbucket could support it :)
+    let $gitrepourl := "https://api.github.com/repos/" || $owner ||"/" || $repo || "?access_token=" || $access_token
+    let $log := console:log($gitrepourl)
+    let $archive-url := replace(json-doc($gitrepourl)?archive_url, "\{archive_format\}\{/ref\}", "zipball")
+
+    let $shortid := $repo
+    let $top_level_collection := local:topLevelCollectionQuery($shortid)
+    let $parent-collection := if ($top_level_collection = $repo) then
+        let $result := "/db/apps/scta-data/"
+        return $result
+      else
+        let $result := "/db/apps/scta-data/" || $top_level_collection || "/"
+        return $result
+
+    return
+        gitarc:get-github-archive($archive-url, $parent-collection, $repo)
+
+};
 
 declare function local:files($before, $after, $owner, $repo, $access_token){
 
@@ -129,9 +152,7 @@ let $url := "https://api.github.com/repos/" || $owner ||"/" || $repo || "/compar
 return
   if ($branch = "refs/heads/master") then
     <div>
-      (: {local:files($before, $after, $owner, $repo, $access_token)} :)
-      {local:}
-      {local:log($before, $after, $owner, $repo, $pushed-at, $new_data, $access_token)}
+      {local:replaceCollection($owner, $repo, $access_token)}
     </div>
     else
     <div>
