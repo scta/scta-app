@@ -39,12 +39,11 @@ declare function local:topLevelCollectionQuery($shortid as xs:string){
           return $top_level_expression_short_id
   };
 
+
+
 declare function local:replaceCollection($owner, $repo, $access_token) {
     (: these two lines could become their own function so that other apis like bitbucket could support it :)
-    let $gitrepourl := "https://api.github.com/repos/" || $owner ||"/" || $repo || "?access_token=" || $access_token
-    let $log := console:log($gitrepourl)
-    let $archive-url := replace(json-doc($gitrepourl)?archive_url, "\{archive_format\}\{/ref\}", "zipball")
-
+    let $archive-url := gitarc:getArchiveUrl($owner, $repo, $access_token)
     let $shortid := $repo
     let $top_level_collection := local:topLevelCollectionQuery($shortid)
     let $parent-collection := if ($top_level_collection = $repo) then
@@ -153,6 +152,7 @@ return
   if ($branch = "refs/heads/master") then
     <div>
       {local:replaceCollection($owner, $repo, $access_token)}
+      {local:log($before, $after, $owner, $repo, $pushed-at, $new_data, $access_token)}
     </div>
     else
     <div>

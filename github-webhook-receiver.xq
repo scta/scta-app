@@ -130,7 +130,7 @@ return
   if ($branch = "refs/heads/master") then
     <div>
       (: {local:files($before, $after, $owner, $repo, $access_token)} :)
-      {local:}
+      
       {local:log($before, $after, $owner, $repo, $pushed-at, $new_data, $access_token)}
     </div>
     else
