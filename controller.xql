@@ -48,6 +48,18 @@ declare variable $exist:prefix external;
           <set-attribute name="query" value="{$query}"/>
         </forward>
       </dispatch>
+    else if (starts-with($exist:path, '/search/workgroup/')) then
+      let $fragments := tokenize(substring-after($exist:path, '/search/workgroup/'), '/')
+      let $workGroupId := $fragments[1]
+      (: let $query := $fragments[2] :)
+      let $query := request:get-parameter('query', 'quod')
+      return
+        <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+          <forward url="{$exist:controller}/search/search-text-by-workgroupid.xq">
+            <add-parameter name="workGroupId" value="{$workGroupId}"/>
+            <set-attribute name="query" value="{$query}"/>
+          </forward>
+        </dispatch>
   else if (starts-with($exist:path, '/search/expression/')) then
     let $fragments := tokenize(substring-after($exist:path, '/search/expression/'), '/')
     let $expressionid := $fragments[1]
