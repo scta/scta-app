@@ -128,7 +128,11 @@ $sparql-result := http:send-request(
           let $nl := codepoints-to-string(10)
           let $text := local:render($p)
           let $textClean := local:removePunctation($text)
+          let $id := if (boolean($p/@xml:id)) then
+              $p/@xml:id
+            else
+              concat("tmp:", $cid, ":", generate-id($p))
 
           return
 
-             concat($p/@xml:id, ",", $textClean, ", ", $cid, $nl)
+             concat($id, ",", $textClean, ", ", $cid, $nl)
