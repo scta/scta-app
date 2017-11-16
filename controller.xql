@@ -24,6 +24,14 @@ declare variable $exist:prefix external;
           <add-parameter name="transcriptionid" value="{$transcriptionid}"/>
         </forward>
       </dispatch>
+  else if (starts-with($exist:path, '/csv/')) then
+    let $transcriptionid := substring-after($exist:path, '/csv/')
+    return
+      <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+        <forward url="{$exist:controller}/doc/csv.xq">
+          <add-parameter name="transcriptionid" value="{$transcriptionid}"/>
+        </forward>
+      </dispatch>
   else if (starts-with($exist:path, '/search/author/')) then
     let $fragments := tokenize(substring-after($exist:path, '/search/author/'), '/')
     let $authorid := $fragments[1]
