@@ -37,7 +37,7 @@ let $docs :=
     if ($commentaryid = "all") then
         for $commentaryid in xmldb:get-child-collections('/db/apps/scta-data/')
             for $itemid in xmldb:get-child-collections(concat('/db/apps/scta-data/', $commentaryid))
-                let $transcription := doc(concat('/db/apps/scta-data/', $commentaryid, '/', $itemid, '/transcriptions.xml'))/transcriptions/transcription[0]
+                let $transcription := doc(concat('/db/apps/scta-data/', $commentaryid, '/', $itemid, '/transcriptions.xml'))/transcriptions/transcription[1]
                 return
                     if ($transcription) then
                         (
@@ -52,7 +52,7 @@ let $docs :=
                         )
     else
         for $collection in xmldb:get-child-collections(concat('/db/apps/scta-data/', $commentaryid))
-            let $transcription := doc(concat('/db/apps/scta-data/', $commentaryid, '/', $collection, '/transcriptions.xml'))/transcriptions/transcription[0]
+            let $transcription := doc(concat('/db/apps/scta-data/', $commentaryid, '/', $collection, '/transcriptions.xml'))/transcriptions/transcription[1]
             return
                 if ($transcription) then
                     (
