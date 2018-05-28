@@ -43,7 +43,7 @@ declare function local:getSparqlQuery($surface_id) as xs:string {
           ?next_surface <http://purl.org/dc/elements/1.1/title> ?next_surface_title .
         }
         ?isurface <http://scta.info/property/hasCanvas> ?canvas .
-        ?manifestation_item <http://scta.info/property/hasSurface> <' || $surface_id || '> .
+        ?manifestation_item <http://scta.info/property/isOnSurface> <' || $surface_id || '> .
         ?manifestation_item <http://scta.info/property/structureType> <http://scta.info/resource/structureItem> .
         ?manifestation_item <http://scta.info/property/shortId> ?short_id .
         ?manifestation_item <http://scta.info/property/isManifestationOf> ?expression_item .
