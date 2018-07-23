@@ -42,7 +42,7 @@ declare function local:getHtml($sparql-result as node()) {
 };
 
 (: main query :)
-let $url := "http://sparql.scta.info/ds/query?query=",
+let $url := "http://sparql-docker.scta.info/ds/query?query=",
 $sparql := local:getSparqlQuery(),
 $encoded-sparql := encode-for-uri($sparql),
 $sparql-result := http:send-request(

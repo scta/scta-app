@@ -17,7 +17,7 @@ declare function local:topLevelCollectionQuery($shortid as xs:string){
       }
     ")
     (: main query :)
-    let $url := "http://sparql-staging.scta.info/ds/query?query=",
+    let $url := "http://sparql-docker.scta.info/ds/query?query=",
     $encoded-sparql := encode-for-uri($query),
     $sparql-result := http:send-request(
        <http:request href="{concat($url, $encoded-sparql)}" method="get">
@@ -130,7 +130,7 @@ return
   if ($branch = "refs/heads/master") then
     <div>
       (: {local:files($before, $after, $owner, $repo, $access_token)} :)
-      
+
       {local:log($before, $after, $owner, $repo, $pushed-at, $new_data, $access_token)}
     </div>
     else

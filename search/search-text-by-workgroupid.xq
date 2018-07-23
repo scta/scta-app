@@ -47,7 +47,7 @@ declare function local:recurse($node) {
 
 (: main query :)
 let $workGroup_short_id := request:get-parameter('workGroupId', 'sententia')
-let $url := "http://sparql-staging.scta.info/ds/query?query=",
+let $url := "http://sparql-docker.scta.info/ds/query?query=",
 $sparql := local:getSparqlQuery($workGroup_short_id),
 $encoded-sparql := encode-for-uri($sparql),
 

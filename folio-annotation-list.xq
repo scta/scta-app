@@ -59,7 +59,7 @@ let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 
 (: main query :)
 let $surface_id := request:get-parameter('surface_id', 'http://scta.info/resource/sorb/20r')
-let $url := "http://sparql-staging.scta.info/ds/query?query=",
+let $url := "http://sparql-docker.scta.info/ds/query?query=",
 $sparql := local:getSparqlQuery($surface_id),
 $encoded-sparql := encode-for-uri($sparql),
 

@@ -21,7 +21,7 @@ declare function local:getSparqlQuery($surface) as xs:string {
   }
 
 (: main query :)
-let $url := "http://sparql-staging.scta.info/ds/query?query="
+let $url := "http://sparql-docker.scta.info/ds/query?query="
 let $sparql := local:getSparqlQuery($surface)
 let $encoded-sparql := encode-for-uri($sparql)
 

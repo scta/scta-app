@@ -20,7 +20,7 @@ declare function local:topLevelCollectionQuery($shortid as xs:string){
       }
     ")
     (: main query :)
-    let $url := "http://sparql-staging.scta.info/ds/query?query=",
+    let $url := "http://sparql-docker.scta.info/ds/query?query=",
     $encoded-sparql := encode-for-uri($query),
     $sparql-result := http:send-request(
        <http:request href="{concat($url, $encoded-sparql)}" method="get">

@@ -73,7 +73,7 @@ let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 let $transcription_id := request:get-parameter('transcriptionid', 'summahalensis/critical/transcription')
 let $fragments := tokenize($transcription_id, "/")
 let $expression_short_id := $fragments[1]
-let $url := "http://sparql-staging.scta.info/ds/query?query=",
+let $url := "http://sparql-docker.scta.info/ds/query?query=",
 (: let $url := "http://localhost:3030/ds/query?query=", :)
 $sparql := local:getSparqlQuery($transcription_id),
 $encoded-sparql := encode-for-uri($sparql),

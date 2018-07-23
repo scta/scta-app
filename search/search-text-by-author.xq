@@ -48,7 +48,7 @@ declare function local:recurse($node) {
 
 (: main query :)
 let $author_short_id := request:get-parameter('authorid', 'Aquinas')
-let $url := "http://sparql-staging.scta.info/ds/query?query=",
+let $url := "http://sparql-docker.scta.info/ds/query?query=",
 $sparql := local:getSparqlQuery($author_short_id),
 $encoded-sparql := encode-for-uri($sparql),
 
@@ -88,4 +88,3 @@ for $result in $sparql-result//sparql:result
             <p><a href="/text/{$itemid}#{$pid}">{$itemtitle}, paragraph {$pid}</a> by {$itemauthor}</p>
             <p>{local:render(util:expand($hit))}</p>
             </div>
-              

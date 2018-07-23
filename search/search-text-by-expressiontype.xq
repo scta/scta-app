@@ -48,7 +48,7 @@ declare function local:recurse($node) {
 
 (: main query :)
 let $expression_type_id := request:get-parameter('expression_type_id', '')
-let $url := "http://sparql-staging.scta.info/ds/query?query=",
+let $url := "http://sparql-docker.scta.info/ds/query?query=",
 $sparql := local:getSparqlQuery($expression_type_id),
 $encoded-sparql := encode-for-uri($sparql),
 
