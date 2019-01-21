@@ -47,9 +47,12 @@ declare function local:getSparqlQuery($surface_id) as xs:string {
         ?manifestation_item <http://scta.info/property/structureType> <http://scta.info/resource/structureItem> .
         ?manifestation_item <http://scta.info/property/shortId> ?short_id .
         ?manifestation_item <http://scta.info/property/isManifestationOf> ?expression_item .
+        ?expression_item <http://scta.info/property/totalOrderNumber> ?order .
+        ?manifestation_item <http://scta.info/property/isManifestationOf> ?expression_item .
         ?expression_item <http://scta.info/property/isPartOfTopLevelExpression> ?topLevelExpression .
         ?topLevelExpression <http://scta.info/property/shortId> ?topLevelExpression_short_id .
     }
+    ORDER BY ?order
       ')
       return $query
 };
@@ -59,7 +62,8 @@ let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 
 (: main query :)
 let $surface_id := request:get-parameter('surface_id', 'http://scta.info/resource/sorb/20r')
-let $url := "http://sparql-docker.scta.info/ds/query?query=",
+let $url := "https://sparql-docker.scta.info/ds/query?query=",
+(: let $url := "http://localhost:3030/ds/query?query=", :)
 $sparql := local:getSparqlQuery($surface_id),
 $encoded-sparql := encode-for-uri($sparql),
 
