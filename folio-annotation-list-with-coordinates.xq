@@ -170,6 +170,9 @@ for $result at $count in $sparql-result//sparql:result
   let $fragment := util:get-fragment-between($beginning-node, $ending-node, $make-fragment, $display-root-namespace)
   let $node := util:parse($fragment)
   let $current_offset := ($count * 200) + 10
+  let $test := "test"
+
+
 
   return
 

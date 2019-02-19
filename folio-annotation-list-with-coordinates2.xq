@@ -1,5 +1,10 @@
 xquery version "3.1";
 
+(:  this file successfully returns line annotations, and retrieves coordinates for gracilis coords :)
+(:  the tokenize to lines, is adding an extra blank line, at the moment being labeled line 0 which needs to be removed :)
+(:  and the coordinate retrieval needs to be expanded so that it can work for other texts besides gracilis :)
+(:  https sparql calls are not working, so a local instance of sparql needs to be running :)
+
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace sparql = "http://www.w3.org/2005/sparql-results#";
@@ -14,15 +19,21 @@ import module namespace http = "http://expath.org/ns/http-client" at "/http-clie
 declare function local:render($node) {
     typeswitch($node)
         case text() return concat(normalize-space($node), " ")
-        case element(tei:corr) return ()
+(:        case element(tei:corr) return ():)
         case element(tei:reg) return ()
         case element(tei:note) return ()
-        case element(tei:lb) return "<br/> * "
-        case element(tei:cb) return "<br/> [column break] "
-        case element(tei:pb) return "<br/> [page break] "
+        case element(tei:lb) return "///"
+        case element(tei:cb) return ()
+        case element(tei:pb) return ()
         case element(tei:head) return ()
         default return local:recurse($node)
 };
+
+declare function local:getLineArray($textstring) {
+    let $stringArray := tokenize($textstring, "///")
+    return $stringArray
+};
+
 
 declare function local:recurse($node) {
     for $child in $node/node()
@@ -171,7 +182,18 @@ for $result at $count in $sparql-result//sparql:result
   let $node := util:parse($fragment)
   let $current_offset := ($count * 200) + 10
 
-  return
+  let $stringArray := local:getLineArray(normalize-space(string-join(local:render($node))))
+
+  for $line at $pos in $stringArray
+    let $realPosition := $pos - 1
+(: TODO, coordinat file name needs to be able discerned from query. the file could be named the same as the convas or the Surface ID,
+ : but image file names and surface ids rarely match. But coordinate files don't need to have the name of the     :)
+    let $coorddocpath := concat('/db/apps/scta-data/simpleXmlCoordinates/', $prefix, '/L', $surface_title, '.xml')
+    let $coorddoc := doc($coorddocpath)
+    let $lineid := concat("r1l", $realPosition)
+    let $coordinates := $coorddoc/lines/line[id=$lineid]/iiif
+    where $pos != 1
+    return
 
 
               map {
@@ -181,12 +203,12 @@ for $result at $count in $sparql-result//sparql:result
                   "resource": map {
                       "@id": "http://scta.lombardpress.org/text/plaintext/"|| $prefix ||"/"|| $surface_title ||"/transcription/" || $count,
                       "@type": "dctypes:Text",
-                      "chars": string-join(local:render($node)),
+                      "chars": $line,
                       "format": "text/html",
-                      "label": $fs,
+                      "label": concat("line ", $realPosition),
                       "end": $next_surface_title
                   },
-          "on": $canvasid || "#xywh=0,"|| $current_offset ||",300,200"
+          "on": $canvasid || "#xywh="|| $coordinates
 
               }
 
