@@ -39,6 +39,7 @@ let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 let $q := request:get-parameter('q', 'potest')
 let $codex := request:get-parameter('codex', '')
 let $searchuri := request:get-uri()
+let $searchuribase := "http://localhost:8080"
 (: full-msslug should be able to be parsed from requesting url :)
 let $manifestationid := $codex
 
@@ -111,25 +112,26 @@ let $hits :=
         else
             $allHits
 
+
 return
 
         map{
           "@context":"http://iiif.io/api/search/0/context.json",
-          "@id": concat("http://exist.scta.info", $resultsUrl),
+          "@id": concat($searchuribase, $resultsUrl),
           "@type":"sc:AnnotationList",
           (: it would be best if the followin properties were only
           present when the page parameter is set to an integer but ignored if the search results
           are for all, but I currently can't figure out how to execute a condition here :)
           "within": map
           {
-            "@id": concat("http://exist.scta.info", $searchuri, "?q=", $q),
+            "@id": concat($searchuribase, $searchuri, "?q=", $q),
             "@type": "sc:Layer",
             "total": count($allHits),
-            "first": concat("http://exist.scta.info", $searchuri, "?q=", $q, "&amp;page=", $firstPage),
-            "last": concat("http://exist.scta.info", $searchuri, "?q=", $q, "&amp;page=", $lastPage)
+            "first": concat($searchuribase, $searchuri, "?q=", $q, "&amp;page=", $firstPage),
+            "last": concat($searchuribase, $searchuri, "?q=", $q, "&amp;page=", $lastPage)
           },
-          "next": concat("http://exist.scta.info", $searchuri, "?q=", $q, "&amp;page=", $nextPage),
-          "prev": concat("http://exist.scta.info", $searchuri, "?q=", $q, "&amp;page=", $prevPage),
+          "next": concat($searchuribase, $searchuri, "?q=", $q, "&amp;page=", $nextPage),
+          "prev": concat($searchuribase, $searchuri, "?q=", $q, "&amp;page=", $prevPage),
           "startIndex": $startIndex,
 
 
@@ -141,9 +143,11 @@ return
 
             let $coords := $hit/preceding-sibling::new:iiifAdjusted/string()
             let $lineNumber := $hit/preceding-sibling::new:lineNumber/string()
-            let $surfaceId := $hit/preceding-sibling::new:surfaceIdSlug/string()
+            let $surfaceId := $hit/preceding-sibling::new:surfaceId/string()
+            let $surfaceIdSlug := $hit/preceding-sibling::new:surfaceIdSlug/string()
             let $canvasid := $hit/preceding-sibling::new:canvasId/string()
             let $imageUrl := $hit/preceding-sibling::new:imageUrl/string()
+            let $column := $hit/preceding-sibling::new:column/string()
 
             let $on := concat($canvasid, '#xywh=', $coords)
             let $pageOrderNumber := $hit/preceding-sibling::new:pageOrderNumber/number()
@@ -154,7 +158,7 @@ return
                     map {
                         "@id": concat("http://scta.info/iiif/", $manifestationid, "/search/annotations/", $lineNumber),
                         "@type": "oa:Annotation",
-                        "label": concat($surfaceId, "(", $pageOrderNumber, ") - line: ", $lineNumber),
+                        "label": concat($surfaceIdSlug, "(", $pageOrderNumber, "),", $column, " - line: ", $lineNumber),
                         "motivation": "sc:painting",
                         "resource":
                             map {
@@ -162,7 +166,8 @@ return
                                 "chars": local:render(util:expand($hit))
                             },
                         "on": $on,
-                        "imageUrl": $imageUrl
+                        "imageUrl": $imageUrl,
+                        "surfaceId": $surfaceId
                     }
 
 

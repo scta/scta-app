@@ -15,7 +15,15 @@ declare variable $exist:prefix external;
           <add-parameter name="manifestationid" value="{$manifestationid}"/>
         </forward>
       </dispatch>
-
+  else if (starts-with($exist:path, '/iiif2/')) then
+    let $fragments := substring-after($exist:path, '/iiif2/')
+    let $codexid := substring-before($fragments, "/search")
+    return
+      <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+        <forward url="{$exist:controller}/iiifsearch-with-paging-line-level-from-simpleXmlCoordinates.xq">
+          <add-parameter name="codex" value="{$codexid}"/>
+        </forward>
+      </dispatch>
   else if (starts-with($exist:path, '/document/')) then
     let $transcriptionid := substring-after($exist:path, '/document/')
     return

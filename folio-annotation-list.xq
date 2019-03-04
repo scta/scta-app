@@ -119,7 +119,9 @@ for $result at $count in $sparql-result//sparql:result
     else if (contains($surface_title, "v")) then (
       concat(substring-before($surface_title, "v"), "-v")
     )
-    else()
+    else(
+      $surface_title
+    )
   )
   let $surface_number_end := if ($schema eq "lbp-diplomatic-0.0.0") then (
     concat($next_surface_title, "a")
@@ -131,7 +133,9 @@ for $result at $count in $sparql-result//sparql:result
       else if (contains($next_surface_title, "v")) then (
         concat(substring-before($next_surface_title, "v"), "-v")
       )
-      else()
+      else(
+        $next_surface_title
+      )
     )
 
 

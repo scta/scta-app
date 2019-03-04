@@ -124,7 +124,9 @@ for $result at $count in $sparql-result//sparql:result
     else if (contains($surface_title, "v")) then (
       concat(substring-before($surface_title, "v"), "-v")
     )
-    else()
+    else(
+      $surface_title
+    )
   )
   let $surface_number_end := if ($schema eq "lbp-diplomatic-0.0.0") then (
     concat($next_surface_title, "a")
@@ -136,7 +138,9 @@ for $result at $count in $sparql-result//sparql:result
       else if (contains($next_surface_title, "v")) then (
         concat(substring-before($next_surface_title, "v"), "-v")
       )
-      else()
+      else(
+        $next_surface_title
+      )
     )
 
 
@@ -181,12 +185,7 @@ for $result at $count in $sparql-result//sparql:result
   for $line at $pos in $stringArray
 
     let $realPosition := $pos - 1
-(: TODO, coordinat file name needs to be able discerned from query. the file could be named the same as the convas or the Surface ID,
- : but image file names and surface ids rarely match. But coordinate files don't need to have the name of the     :)
-    let $coorddocpath := concat('/db/apps/scta-data/simpleXmlCoordinates/', $prefix, '/L', $surface_title, '.xml')
-    let $coorddoc := doc($coorddocpath)
-    let $lineid := concat("r1l", $realPosition)
-    let $coordinates := $coorddoc/lines/line[id=$lineid]/iiif
+
     where $pos != 1
     return
       <line n="{$realPosition}">

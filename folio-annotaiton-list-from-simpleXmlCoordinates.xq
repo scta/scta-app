@@ -35,14 +35,14 @@ declare function local:recurse($node) {
 (: set response header :)
 
 let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
-let $folio := request:get-parameter('folio', 'L12v')
-let $doc := doc(concat('/db/apps/simpleXmlCoordinates/lon/', $folio, '.xml'))
+let $surfaceid := request:get-parameter('surfaceid', 'lon/12v')
+let $doc := doc(concat('/db/apps/simpleXmlCoordinates/', $surfaceid, '.xml'))
 
 return
 
         map{
           "@context":"http://iiif.io/api/search/0/context.json",
-          "@id": concat("http://exist.scta.info/", $folio),
+          "@id": concat("http://exist.scta.info/", $surfaceid),
           "@type":"sc:AnnotationList",
           "resources":
 
@@ -50,24 +50,27 @@ return
 
             let $coords := $line/new:iiifAdjusted/string()
             let $lineNumber := $line/new:lineNumber/string()
+            let $column := $line/new:column/string()
             let $surfaceId := $line/new:surfaceIdSlug/string()
             let $canvasid := $line/new:canvasId/string()
+            let $imageUrl := $line/new:imageUrl/string()
             let $text := $line/new:text
             let $on := concat($canvasid, '#xywh=', $coords)
             let $pageOrderNumber := $line/new:pageOrderNumber/number()
             return
 
                     map {
-                        "@id": concat("http://scta.info/iiif/", $folio),
+                        "@id": concat("http://scta.info/iiif/", $surfaceid),
                         "@type": "oa:Annotation",
-                        "label": concat($surfaceId, "(", $pageOrderNumber, ") - line: ", $lineNumber),
+                        "label": concat($surfaceId, "(", $pageOrderNumber, "),", $column, " - line: ", $lineNumber),
                         "motivation": "sc:painting",
                         "resource":
                             map {
                                 "@type": "cnt:ContentAsText",
                                 "chars": local:render(util:expand($text))
                             },
-                        "on": $on
+                        "on": $on,
+                        "imageUrl": $imageUrl
                     }
 
 
