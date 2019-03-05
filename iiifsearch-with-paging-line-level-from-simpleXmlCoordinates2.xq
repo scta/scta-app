@@ -4,9 +4,11 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace new="http://new";
 
-import module namespace response = "http://exist-db.org/xquery/response";
+declare namespace sparql = "http://www.w3.org/2005/sparql-results#";
 
-import module namespace console="http://exist-db.org/xquery/console" at "java:org.exist.console.xquery.ConsoleModule";
+import module namespace http = "http://expath.org/ns/http-client" at "/http-client/http-client.xq";
+
+import module namespace response = "http://exist-db.org/xquery/response";
 
 
 declare option output:method "json";
@@ -31,6 +33,45 @@ declare function local:recurse($node) {
         local:render($child)
 };
 
+declare function local:getCodex($codex as xs:string) as xs:string {
+    (: currently cannot get $expression_type_id passed into query string; so it is currently hard coded to librum1-prologus :)
+let $query := xs:string('
+      SELECT ?codex ?codexTitle
+      WHERE
+      {
+          <http://scta.info/resource/' || $codex || '> a <http://scta.info/resource/codex> .
+          <http://scta.info/resource/' || $codex || '> <http://purl.org/dc/elements/1.1/title> ?codexTitle .
+
+      }
+    ')
+    return $query
+};
+
+declare function local:getAllCodices() as xs:string {
+    (: currently cannot get $expression_type_id passed into query string; so it is currently hard coded to librum1-prologus :)
+let $query := xs:string('
+    SELECT ?codex ?codexTitle
+    WHERE
+    {
+        ?codex a <http://scta.info/resource/codex> .
+        ?codex <http://purl.org/dc/elements/1.1/title> ?codexTitle .
+    }
+    ')
+    return $query
+};
+declare function local:getAllCodicesByInstitution($institution as xs:string) as xs:string {
+let $query := xs:string('
+    SELECT ?codex ?codexTitle
+    WHERE
+    {
+        ?codex a <http://scta.info/resource/codex> .
+        ?codex <http://purl.org/dc/elements/1.1/title> ?codexTitle .
+        ?codex <http://scta.info/property/hasCanonicalCodexItem> ?icodex .
+        ?icodex <http://scta.info/property/holdingInstitution> <http://scta.info/resource/' || $institution || '> .
+    }
+    ')
+    return $query
+};
 
 (: set response header :)
 
@@ -38,20 +79,43 @@ let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 
 let $q := request:get-parameter('q', 'potest')
 let $codex := request:get-parameter('codex', '')
+let $institution := request:get-parameter('institution', '')
 let $searchuri := request:get-uri()
 let $searchuribase := "http://localhost:8080"
 (: full-msslug should be able to be parsed from requesting url :)
 let $manifestationid := $codex
 
+(: let $url := "https://sparql-docker.scta.info/ds/query?query=" :)
+let $url := "http://localhost:3030/ds/query?query="
+let $sparql := if ($codex != '') then
+    local:getCodex($codex)
+  else if ($institution) then
+    local:getAllCodicesByInstitution($institution)
+  else
+    local:getAllCodices()
 
-(: let $docs := if (collection(concat('/db/apps/scta-data/simpleXmlCoordinates', $commentaryid))[contains(util:document-name(.), $msslug)])
-                then
-                collection(concat('/db/apps/scta-data/', $commentaryid))[contains(util:document-name(.), $msslug)]
-                else
-                collection(concat('/db/apps/scta-data/', $commentaryid)) :)
 
-(: let $docs := collection(concat('/db/apps/scta-data/simpleXmlCoordinates/', $msslug)) :)
-let $docs := collection(concat('/db/apps/simpleXmlCoordinates/', $codex))
+let $encoded-sparql := encode-for-uri($sparql)
+
+let $sparql-result := http:send-request(
+   <http:request href="{concat($url, $encoded-sparql)}" method="get">
+      <http:header name="accept" value="application/xml"/>
+   </http:request>
+)
+
+
+(: let $testList := <list><item>lon</item><item>penn</item><item>penn855</item></list> :)
+for $result in $sparql-result//sparql:result
+
+  let $url-array := fn:tokenize($result/sparql:binding[@name="codex"]/sparql:uri/text(), "/")
+  let $item := if ($codex != '') then
+      $codex
+    else
+      $url-array[last()]
+
+  let $codexTitle := $result/sparql:binding[@name="codexTitle"]/sparql:literal/text()
+
+let $docs := collection(concat('/db/apps/simpleXmlCoordinates/', $item))
 let $start:= xs:integer(request:get-parameter("start", "1"))
 let $records := xs:integer(request:get-parameter("records", "5"))
 let $page := request:get-parameter("page","1")
@@ -92,9 +156,9 @@ let $prevPage :=
 
 let $resultsUrl :=
         if ($page != "all") then
-            concat($searchuri, "?q=", $q, "&amp;page=", $page, "&amp;codex=", $codex)
+            concat($searchuri, "?q=", $q, "&amp;page=", $page, "&amp;codex=", $item)
         else
-            concat($searchuri, "?q=", $q)
+            concat($searchuri, "?q=", $q, "&amp;codex=", $item)
 
 
 (: compute the limits for this page :)
@@ -112,26 +176,27 @@ let $hits :=
         else
             $allHits
 
-
+where count($allHits) > 0
 return
 
         map{
           "@context":"http://iiif.io/api/search/0/context.json",
           "@id": concat($searchuribase, $resultsUrl),
           "@type":"sc:AnnotationList",
+          "label": $codexTitle,
           (: it would be best if the followin properties were only
           present when the page parameter is set to an integer but ignored if the search results
           are for all, but I currently can't figure out how to execute a condition here :)
           "within": map
           {
-            "@id": concat($searchuribase, $searchuri, "?q=", $q, "&amp;codex=", $codex),
+            "@id": concat($searchuribase, $searchuri, "?q=", $q),
             "@type": "sc:Layer",
             "total": count($allHits),
-            "first": concat($searchuribase, $searchuri, "?q=", $q, "&amp;page=", $firstPage, "&amp;codex=", $codex),
-            "last": concat($searchuribase, $searchuri, "?q=", $q, "&amp;page=", $lastPage,  "&amp;codex=", $codex)
+            "first": concat($searchuribase, replace($searchuri, "2.xq", ".xq"), "?q=", $q, "&amp;page=", $firstPage, "&amp;codex=", $item),
+            "last": concat($searchuribase, replace($searchuri, "2.xq", ".xq"), "?q=", $q, "&amp;page=", $lastPage, "&amp;codex=", $item)
           },
-          "next": concat($searchuribase, $searchuri, "?q=", $q, "&amp;page=", $nextPage,  "&amp;codex=", $codex),
-          "prev": concat($searchuribase, $searchuri, "?q=", $q, "&amp;page=", $prevPage,  "&amp;codex=", $codex),
+          "next": concat($searchuribase, replace($searchuri, "2.xq", ".xq"), "?q=", $q, "&amp;page=", $nextPage, "&amp;codex=", $item),
+          "prev": concat($searchuribase, replace($searchuri, "2.xq", ".xq"), "?q=", $q, "&amp;page=", $prevPage, "&amp;codex=", $item),
           "startIndex": $startIndex,
 
 
