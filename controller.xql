@@ -20,7 +20,7 @@ declare variable $exist:prefix external;
     let $codexid := substring-before($fragments, "/search")
     return
       <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
-        <forward url="{$exist:controller}/iiifsearch-with-paging-line-level-from-simpleXmlCoordinates.xq">
+        <forward url="{$exist:controller}/iiifsearch-with-paging-line-level-from-simpleXmlCoordinates2.xq">
           <add-parameter name="codex" value="{$codexid}"/>
         </forward>
       </dispatch>

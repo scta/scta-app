@@ -192,11 +192,11 @@ return
             "@id": concat($searchuribase, $searchuri, "?q=", $q),
             "@type": "sc:Layer",
             "total": count($allHits),
-            "first": concat($searchuribase, replace($searchuri, "2.xq", ".xq"), "?q=", $q, "&amp;page=", $firstPage, "&amp;codex=", $item),
-            "last": concat($searchuribase, replace($searchuri, "2.xq", ".xq"), "?q=", $q, "&amp;page=", $lastPage, "&amp;codex=", $item)
+            "first": concat($searchuribase, $searchuri, "?q=", $q, "&amp;page=", $firstPage, "&amp;codex=", $item),
+            "last": concat($searchuribase, $searchuri, "?q=", $q, "&amp;page=", $lastPage, "&amp;codex=", $item)
           },
-          "next": concat($searchuribase, replace($searchuri, "2.xq", ".xq"), "?q=", $q, "&amp;page=", $nextPage, "&amp;codex=", $item),
-          "prev": concat($searchuribase, replace($searchuri, "2.xq", ".xq"), "?q=", $q, "&amp;page=", $prevPage, "&amp;codex=", $item),
+          "next": concat($searchuribase, $searchuri, "?q=", $q, "&amp;page=", $nextPage, "&amp;codex=", $item),
+          "prev": concat($searchuribase, $searchuri, "?q=", $q, "&amp;page=", $prevPage, "&amp;codex=", $item),
           "startIndex": $startIndex,
 
 
