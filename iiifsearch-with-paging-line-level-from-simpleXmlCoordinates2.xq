@@ -50,12 +50,31 @@ let $query := xs:string('
 declare function local:getAllCodices() as xs:string {
     (: currently cannot get $expression_type_id passed into query string; so it is currently hard coded to librum1-prologus :)
 let $query := xs:string('
-    SELECT ?codex ?codexTitle
+    SELECT ?codex ?codexTitle ?date
     WHERE
     {
         ?codex a <http://scta.info/resource/codex> .
         ?codex <http://purl.org/dc/elements/1.1/title> ?codexTitle .
+        OPTIONAL{
+          ?codex <http://scta.info/property/publicationDate> ?date.
+        }
     }
+    ORDER BY ?date
+    ')
+    return $query
+};
+declare function local:getCodicesByAfterDate($date as xs:string) as xs:string {
+    (: currently cannot get $expression_type_id passed into query string; so it is currently hard coded to librum1-prologus :)
+let $query := xs:string('
+    SELECT ?codex ?codexTitle ?date
+    WHERE
+    {
+        ?codex a <http://scta.info/resource/codex> .
+        ?codex <http://purl.org/dc/elements/1.1/title> ?codexTitle .
+        ?codex <http://scta.info/property/publicationDate> ?date .
+        FILTER(?date >= "' || $date || '") .
+    }
+    ORDER BY ?date
     ')
     return $query
 };
@@ -80,17 +99,20 @@ let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 let $q := request:get-parameter('q', 'potest')
 let $codex := request:get-parameter('codex', '')
 let $institution := request:get-parameter('institution', '')
+let $afterDate := request:get-parameter('afterDate', '')
 let $searchuri := request:get-uri()
 let $searchuribase := "http://localhost:8080"
 (: full-msslug should be able to be parsed from requesting url :)
 let $manifestationid := $codex
 
-(: let $url := "https://sparql-docker.scta.info/ds/query?query=" :)
-let $url := "http://localhost:3030/ds/query?query="
+let $url := "https://sparql-docker.scta.info/ds/query?query="
+(: let $url := "http://localhost:3030/ds/query?query=" :)
 let $sparql := if ($codex != '') then
     local:getCodex($codex)
   else if ($institution) then
     local:getAllCodicesByInstitution($institution)
+  else if ($afterDate) then
+    local:getCodicesByAfterDate($afterDate)
   else
     local:getAllCodices()
 
@@ -113,6 +135,7 @@ for $result in $sparql-result//sparql:result
     else
       $url-array[last()]
 
+  let $codexDate := $result/sparql:binding[@name="date"]/sparql:literal/text()
   let $codexTitle := $result/sparql:binding[@name="codexTitle"]/sparql:literal/text()
 
 let $docs := collection(concat('/db/apps/simpleXmlCoordinates/', $item))
@@ -183,7 +206,7 @@ return
           "@context":"http://iiif.io/api/search/0/context.json",
           "@id": concat($searchuribase, $resultsUrl),
           "@type":"sc:AnnotationList",
-          "label": $codexTitle,
+          "label": concat($codexTitle, ' (', $codexDate, ')'),
           (: it would be best if the followin properties were only
           present when the page parameter is set to an integer but ignored if the search results
           are for all, but I currently can't figure out how to execute a condition here :)
