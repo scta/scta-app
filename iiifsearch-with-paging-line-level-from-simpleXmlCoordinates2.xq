@@ -16,9 +16,9 @@ declare option output:media-type "application/json";
 
 declare function local:render($node) {
     typeswitch($node)
-        case text() return concat($node, ' ')
-        (: case element(tei:p) return <p>{local:recurse($node)}</p>
-        case element(tei:title) return <em>{local:recurse($node)}</em>
+        case text() return concat(normalize-space($node), ' ')
+        (: case element(new:word) return local:recurse($node) :)
+        (: case element(tei:title) return <em>{local:recurse($node)}</em>
         case element(tei:name) return <span style="font-variant: small-caps">{local:recurse($node)}</span> :)
         case element(exist:match) return <span style="background-color: yellow;">{local:recurse($node)}</span>
         (: case element(tei:rdg) return ()
@@ -101,12 +101,15 @@ let $codex := request:get-parameter('codex', '')
 let $institution := request:get-parameter('institution', '')
 let $afterDate := request:get-parameter('afterDate', '')
 let $searchuri := request:get-uri()
+(: would like to use conditional here to set $searchuribase but it doesn't seem to be working
+ if (fn:environment-variable("EXIST_DEVELOPMENT") eq "true") then) :)
 let $searchuribase := "http://localhost:8080"
+(: let $searchuribase := "https://exist.scta.info" :)
 (: full-msslug should be able to be parsed from requesting url :)
 let $manifestationid := $codex
 
-let $url := "https://sparql-docker.scta.info/ds/query?query="
-(: let $url := "http://localhost:3030/ds/query?query=" :)
+(: let $url := "https://sparql-docker.scta.info/ds/query?query=" :)
+let $url := "http://localhost:3030/ds/query?query="
 let $sparql := if ($codex != '') then
     local:getCodex($codex)
   else if ($institution) then
@@ -244,7 +247,7 @@ return
             return
 
                     map {
-                        "@id": concat("http://scta.info/iiif/", $manifestationid, "/search/annotations/", $lineNumber),
+                        "@id": concat("http://scta.info/iiif/search/annotations/", $item, "/", $surfaceIdSlug, "/", $lineNumber),
                         "@type": "oa:Annotation",
                         "label": concat($surfaceIdSlug, "(", $pageOrderNumber, "),", $column, " - line: ", $lineNumber),
                         "motivation": "sc:painting",

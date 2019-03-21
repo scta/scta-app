@@ -48,7 +48,7 @@ return
 
             for $line at $count in $doc//new:line
 
-            let $coords := $line/new:iiifAdjusted/string()
+            let $coords := $line/new:iiif/string()
             let $lineNumber := $line/new:lineNumber/string()
             let $column := $line/new:column/string()
             let $surfaceId := $line/new:surfaceIdSlug/string()
@@ -60,7 +60,7 @@ return
             return
 
                     map {
-                        "@id": concat("http://scta.info/iiif/", $surfaceid),
+                        "@id": concat("http://scta.info/iiif/", $surfaceid, '/', $lineNumber),
                         "@type": "oa:Annotation",
                         "label": concat($surfaceId, "(", $pageOrderNumber, "),", $column, " - line: ", $lineNumber),
                         "motivation": "sc:painting",
