@@ -32,6 +32,15 @@ declare variable $exist:prefix external;
           <add-parameter name="transcriptionid" value="{$transcriptionid}"/>
         </forward>
       </dispatch>
+  else if (starts-with($exist:path, '/text/')) then
+    let $filepath := substring-after($exist:path, '/text/')
+    let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
+    return
+
+      <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+        <forward url="{$exist:controller}/../scta-data/{$filepath}">
+        </forward>
+      </dispatch>
   else if (starts-with($exist:path, '/csv/')) then
     let $transcriptionid := substring-after($exist:path, '/csv/')
     return
