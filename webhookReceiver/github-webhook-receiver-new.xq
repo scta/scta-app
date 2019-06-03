@@ -61,7 +61,7 @@ declare function local:replaceCollection($owner, $repo, $access_token) {
 declare function local:files($before, $after, $owner, $repo, $access_token){
 
   let $url := "https://api.github.com/repos/" || $owner ||"/" || $repo || "/compare/" || $before ||"..." || $after || "?access_token=" || $access_token
-  let $request := <http:request method="GET" href="{$url}" timeout="30"/>
+  let $request := <http:request method="GET" href="{$url}" timeout="60"/>
   let $response := http:send-request($request)
   let $shortid := $repo
   let $top_level_collection := local:topLevelCollectionQuery($shortid)
