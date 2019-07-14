@@ -48,7 +48,7 @@ return
 
             for $line at $count in $doc//new:line
 
-            let $coords := $line/new:iiif/string()
+            let $coords := $line/new:iiifAdjusted/string()
             let $lineNumber := $line/new:lineNumber/string()
             let $column := $line/new:column/string()
             let $surfaceId := $line/new:surfaceIdSlug/string()
