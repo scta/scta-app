@@ -15,13 +15,14 @@ declare function local:removePunctation($string) {
 
 declare function local:render($node) {
     typeswitch($node)
-        case text() return concat(local:removePunctation($node), '  ')
+        case text() return $node
         case element(tei:p) return <p>{local:recurse($node)}</p>
         case element(tei:rdg) return ()
         case element(tei:bibl) return ()
         case element (tei:note) return ()
         case element (tei:orig) return ()
         case element (tei:corr) return ()
+        case element (tei:lb) return ()
         default return local:recurse($node)
 };
 
@@ -50,7 +51,7 @@ declare function local:getSparqlQuery($transcription_id as xs:string) as xs:stri
 let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 
 (: main query :)
-let $transcription_id := request:get-parameter('resourceid', 'http://scta.info/resource/l1-cpspfs/critical/transcription')
+let $transcription_id := request:get-parameter('resourceid', 'http://scta.info/resource/l1-cpspfs/reims/transcription')
 let $fragments := tokenize($transcription_id, "http://scta.info/resource/")
 let $slug := $fragments[2]
 let $pid := tokenize($slug, "/")[1]
