@@ -16,6 +16,7 @@ declare function local:removePunctation($string) {
 declare function local:render($node) {
     typeswitch($node)
         case text() return $node
+        case element(tei:div) return <div>{local:recurse($node)}</div>
         case element(tei:p) return <p>{local:recurse($node)}</p>
         case element(tei:rdg) return ()
         case element(tei:bibl) return ()
@@ -23,6 +24,7 @@ declare function local:render($node) {
         case element (tei:orig) return ()
         case element (tei:corr) return ()
         case element (tei:lb) return ()
+        case element (tei:head) return ()
         default return local:recurse($node)
 };
 
@@ -40,9 +42,16 @@ declare function local:getSparqlQuery($transcription_id as xs:string) as xs:stri
   SELECT ?item ?topLevelTranscription
   WHERE
   {
-      <' || $transcription_id || '> <http://scta.info/property/isPartOfStructureItem> ?item .
+      {
+          <' || $transcription_id || '> <http://scta.info/property/structureType> <http://scta.info/resource/structureItem> .
+          BIND (<' || $transcription_id || '> as ?item)
+      }
+      UNION
+          {
+          <' || $transcription_id || '> <http://scta.info/property/isPartOfStructureItem> ?item .
+          }
       <' || $transcription_id || '> <http://scta.info/property/isPartOfTopLevelTranscription> ?topLevelTranscription .
-
+      
   }
     ')
     return $query
@@ -77,9 +86,11 @@ $sparql-result := http:send-request(
 
         let $doc := doc(concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $fileid, '.xml'))
 
-        let $div := $doc/tei:TEI/tei:text/tei:body//*[@xml:id=$itemid]
-
-        for $p in $div//tei:p[@xml:id=$pid]
+(:        let $div := $doc/tei:TEI/tei:text/tei:body//*[@xml:id=$itemid]:)
+(::)
+(:        for $p in $div//tei:p[@xml:id=$pid]:)
+        
+        for $p in $doc/tei:TEI/tei:text/tei:body//*[@xml:id=$pid]
 
           let $nl := codepoints-to-string(10)
           let $text := local:render($p)
@@ -88,7 +99,7 @@ $sparql-result := http:send-request(
               $p/@xml:id
             else
               concat("tmp:", $cid, ":", generate-id($p))
-
+          
           return
 
              $textClean
