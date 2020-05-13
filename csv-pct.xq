@@ -18,6 +18,9 @@ declare function local:render($node) {
         case text() return $node
         case element(tei:div) return <div>{local:recurse($node)}</div>
         case element(tei:p) return <p>{local:recurse($node)}</p>
+        case element(tei:quote) return <p>{local:recurse($node)}</p>
+        case element(tei:ref) return <p>{local:recurse($node)}</p>
+        case element(tei:name) return <p>{local:recurse($node)}</p>
         case element(tei:rdg) return ()
         case element(tei:bibl) return ()
         case element (tei:note) return ()
@@ -50,6 +53,11 @@ declare function local:getSparqlQuery($transcription_id as xs:string) as xs:stri
           {
           <' || $transcription_id || '> <http://scta.info/property/isPartOfStructureItem> ?item .
           }
+      UNION
+      {
+        <' || $transcription_id || '> <http://scta.info/property/isPartOfStructureBlock> ?block .
+        ?block <http://scta.info/property/isPartOfStructureItem> ?item .
+      }
       <' || $transcription_id || '> <http://scta.info/property/isPartOfTopLevelTranscription> ?topLevelTranscription .
       
   }
