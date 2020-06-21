@@ -648,10 +648,13 @@
   </xsl:template>
   <xsl:template name="quote-bibl">
     <xsl:variable name="source" select="./tei:quote[1]/@source"/>
+    <xsl:variable name="start" select="substring-before(./tei:quote[1]/@synch, '-')"/>
+    <xsl:variable name="end" select="substring-after(./tei:quote[1]/@synch, '-')"/>
     <xsl:choose>
       <xsl:when test="contains($source, 'http://scta.info/resource/')">
         <!-- added data-target-paragraph attribut here because it is hard for jquery to get id in html dom -->
-        <a href="{$source}" data-url="{$source}" class="js-show-reference-paragraph" data-target-resource="{./tei:quote[1]/@xml:id}">
+        <a href="{$source}" data-url="{$source}" class="js-show-reference-paragraph" data-target-resource="{./tei:quote[1]/@xml:id}"
+            data-start="{$start}" data-end="{$end}">
           <xsl:choose>
             <xsl:when test="./tei:bibl">
               <xsl:apply-templates select="./tei:bibl"/>
@@ -670,10 +673,13 @@
   </xsl:template>
   <xsl:template name="ref-bibl">
     <xsl:variable name="target" select="./tei:ref[1]/@target"/>
+    <xsl:variable name="start" select="substring-before(./tei:ref[1]/@synch, '-')"/>
+    <xsl:variable name="end" select="substring-after(./tei:ref[1]/@synch, '-')"/>
     <xsl:choose>
       <xsl:when test="contains($target, 'http://scta.info/resource/')">
         <!-- added data-target-paragraph attribute here because it is hard for jquery to get id in html dom -->
-        <a href="{$target}" data-url="{$target}" class="js-show-reference-paragraph" data-target-resource="{./tei:ref[1]/@xml:id}">
+        <a href="{$target}" data-url="{$target}" class="js-show-reference-paragraph" data-target-resource="{./tei:ref[1]/@xml:id}"
+            data-start="{$start}" data-end="{$end}">
           <xsl:choose>
             <xsl:when test="./tei:bibl">
               <xsl:apply-templates select="./tei:bibl"/>
