@@ -36,6 +36,7 @@ declare function local:recurse($node) {
 
 let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 let $surfaceid := request:get-parameter('surfaceid', 'lon/12v')
+let $coordTightness := request:get-parameter('coords', 'tight')
 let $doc := doc(concat('/db/apps/simpleXmlCoordinates/', $surfaceid, '.xml'))
 
 return
@@ -48,7 +49,7 @@ return
 
             for $line at $count in $doc//new:line
 
-            let $coords := $line/new:iiifAdjusted/string()
+            let $coords := if ($coordTightness eq "tight") then $line/new:iiif/string() else $line/new:iiifAdjusted/string()
             let $lineNumber := $line/new:lineNumber/string()
             let $column := $line/new:column/string()
             let $surfaceId := $line/new:surfaceIdSlug/string()
