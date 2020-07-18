@@ -75,7 +75,18 @@ return
     let $itemid := $url-array[last()]
     let $url-cid-array := fn:tokenize($result/sparql:binding[@name="topLevelExpression"]/sparql:uri/text(), "/")
     let $cid := $url-cid-array[last()]
-    let $doc := concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $itemid, '.xml')
+    
+    let $transcription := doc(concat('/db/apps/scta-data/', $cid, '/', $itemid, '/transcriptions.xml'))/transcriptions/transcription[1]
+    
+(:    let $doc := concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $itemid, '.xml'):)
+    
+    let $doc := if ($transcription) then 
+                    concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $transcription)
+                else
+                    concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $itemid, '.xml')
+                    
+    
+    
 
     let $query := request:get-parameter('query', 'potentia')
 

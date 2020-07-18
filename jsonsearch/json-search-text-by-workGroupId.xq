@@ -4,12 +4,11 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace sparql = "http://www.w3.org/2005/sparql-results#";
 
-declare option output:method "html5";
-declare option output:media-type "text/html";
+declare option output:method "json";
+declare option output:media-type "application/json";
 
 import module namespace http = "http://expath.org/ns/http-client" at "/http-client/http-client.xq";
 
-declare option exist:serialize "method=html5 media-type=text/html";
 
 declare function local:getSparqlQuery($workGroup_short_id) as xs:string {
     (: currently cannot get $expression_type_id passed into query string; so it is currently hard coded to librum1-prologus :)
@@ -46,7 +45,8 @@ declare function local:recurse($node) {
 };
 
 (: main query :)
-let $workGroup_short_id := request:get-parameter('workGroupId', 'sententia')
+let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
+let $workGroup_short_id := request:get-parameter('workGroupId', 'sententiae')
 let $url := "http://sparql-docker.scta.info/ds/query?query=",
 $sparql := local:getSparqlQuery($workGroup_short_id),
 $encoded-sparql := encode-for-uri($sparql),
@@ -64,26 +64,40 @@ let $documents := collection($collection)[tei:TEI] ! substring-after(base-uri(),
 let $withins := ('graciliscommentary/pg-b1q1/pg-b1q1.xml','graciliscommentary/pg-b1q6/pg-b1q6.xml')
 let $documents-to-show := $documents[. = $withins] :)
 
-
-
-for $result in $sparql-result//sparql:result
+return 
+    map {
+    "results": 
+    
+    for $result in $sparql-result//sparql:result
     let $url-array := fn:tokenize($result/sparql:binding[@name="item"]/sparql:uri/text(), "/")
     let $itemid := $url-array[last()]
     let $url-cid-array := fn:tokenize($result/sparql:binding[@name="topLevelExpression"]/sparql:uri/text(), "/")
     let $cid := $url-cid-array[last()]
-    let $doc := concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $itemid, '.xml')
+    
+    let $transcription := doc(concat('/db/apps/scta-data/', $cid, '/', $itemid, '/transcriptions.xml'))/transcriptions/transcription[1]
+(:    let $doc := concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $itemid, '.xml'):)
+    
+    let $doc := if ($transcription) then 
+                    concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $transcription)
+                else
+                    concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $itemid, '.xml')
 
-    let $query := request:get-parameter('query', 'quod')
+    let $query := request:get-parameter('query', 'potentia')
 
     let $hits := doc($doc)//tei:p[ft:query(., $query)]
+    
+    
+        
         for $hit in $hits
         let $pid := $hit/@xml:id/string()
         let $itemid := $hit/ancestor::tei:body/tei:div/@xml:id/string()
         let $itemtitle := $hit/preceding::tei:titleStmt/tei:title/string()
         let $itemauthor := $hit/preceding::tei:titleStmt/tei:author/string()
-
+        
         return
-            <div>
-            <p><a href="/text/{$itemid}#{$pid}">{$itemtitle}, paragraph {$pid}</a> by {$itemauthor}</p>
-            <p>{local:render(util:expand($hit))}</p>
-            </div>
+            map{
+                "pid": $pid,
+                "text": local:render(util:expand($hit))
+            }
+    }
+    
