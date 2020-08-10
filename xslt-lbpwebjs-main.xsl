@@ -305,7 +305,7 @@
   <xsl:template match="tei:rdg"/>
 
   <!-- clear note desc bib template -->
-  <xsl:template match=" tei:note | tei:desc | tei:bibl"/>
+  <xsl:template match=" tei:note | tei:desc"/>
 
 
   <xsl:template match="tei:cb">
