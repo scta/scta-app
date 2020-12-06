@@ -25,10 +25,17 @@ declare function local:getSparqlQuery($transcription_id as xs:string) as xs:stri
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/hasStructureItem> ?item .
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfTopLevelTranscription> ?topLevelTranscription .
       }
-      # option for division or block
+      # option for division or block 
       OPTIONAL
       {
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfStructureItem> ?item .
+        <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfTopLevelTranscription> ?topLevelTranscription .
+      }
+      # option for element
+      OPTIONAL
+      {
+        <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfStructureBlock> ?block .
+        ?block <http://scta.info/property/isPartOfStructureItem> ?item .
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfTopLevelTranscription> ?topLevelTranscription .
       }
       #option for structureItem
@@ -64,7 +71,7 @@ return
     <teiHeader>
       <fileDesc>
         <titleStmt>
-          <title>Auto constructed for http://scta.info/resoure/{$transcription_id}</title>
+          <title>http://scta.info/resoure/{$transcription_id}</title>
         </titleStmt>
         <publicationStmt>
           <p></p>
