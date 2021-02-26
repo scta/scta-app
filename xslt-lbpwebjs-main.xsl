@@ -218,7 +218,7 @@
   <xsl:template match="tei:ref">
     <xsl:variable name="refid" select="translate(./@ana, '#', '')"/>
     <xsl:variable name="corresp" select="translate(./@corresp, '#', '')"/>
-    <xsl:variable name="target" select="./target"/>
+    <xsl:variable name="target" select="./@target"/>
     <xsl:variable name="id" select="./@xml:id"/>
     <xsl:variable name="start" select="substring-before(./@synch, '-')"/>
     <xsl:variable name="end" select="substring-after(./@synch, '-')"/>
