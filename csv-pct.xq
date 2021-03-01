@@ -8,7 +8,7 @@ declare option exist:serialize "method=text media-type=text/plain";
 import module namespace http = "http://expath.org/ns/http-client" at "/http-client/http-client.xq";
 
 declare function local:removePunctation($string) {
-    let $clean := replace($string, '\s+([^\p{L}|\p{N}]+)', '$1')
+    let $clean := replace($string, '\s+([^\p{L}|\p{N}|\p{P}]+)', '$1')
     let $clean2 := replace($clean, '\s+', ' ')
     return $clean2
 };
