@@ -294,6 +294,9 @@
 
   <!-- if graphic element is present display description -->
   <xsl:template match="tei:graphic">
+    <xsl:if test="./@url">
+      <img src="{./@url}" width="50%"/>
+    </xsl:if>
     <xsl:apply-templates/>
   </xsl:template>
   <xsl:template match="tei:graphic/tei:desc">
