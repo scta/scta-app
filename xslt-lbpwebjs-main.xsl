@@ -180,28 +180,23 @@
     <xsl:variable name="quoterefid" select="translate(./@ana, '#', '')"/>
     <xsl:variable name="source" select="./@source"/>
     <xsl:variable name="id" select="./@xml:id"/>
-    <xsl:variable name="start" select="substring-before(./@synch, '-')"/>
-    <xsl:variable name="end" select="substring-after(./@synch, '-')"/>
+    <xsl:variable name="targetRange" select="./@synch"/>
     
     <xsl:choose>
       <xsl:when test="($isDiplomatic = 'true') and $id and contains($source, 'http://scta.info/resource/')">
         <!-- added data-target-paragraph attribut here because it is hard for jquery to get id in html dom -->
-        <span id="{@xml:id}" 
-          class="lbp-quote js-show-info lbp-quote-clickable js-show-reference-paragraph" 
-          data-pid="{$id}" 
-          data-url="{$source}"
-          data-target-resource="{$id}"
-          data-start="{$start}" data-end="{$end}">
-          <xsl:text></xsl:text>
+        <span id="{@xml:id}" class="lbp-quote js-show-info lbp-quote-clickable js-show-reference-paragraph" data-pid="{$id}" data-url="{$source}" data-target-resource="{$id}" 
+        data-target-range="{$targetRange}">
+          <xsl:text/>
           <xsl:apply-templates/>
-          <xsl:text></xsl:text>
+          <xsl:text/>
         </span>
       </xsl:when>
       <xsl:when test="($isDiplomatic = 'true') and $id">
         <span id="{@xml:id}" class="lbp-quote js-show-info lbp-quote-clickable" data-pid="{$id}">
-          <xsl:text></xsl:text>
+          <xsl:text/>
           <xsl:apply-templates/>
-          <xsl:text></xsl:text>
+          <xsl:text/>
         </span>
       </xsl:when>
       <xsl:otherwise>
@@ -220,29 +215,21 @@
     <xsl:variable name="corresp" select="translate(./@corresp, '#', '')"/>
     <xsl:variable name="target" select="./@target"/>
     <xsl:variable name="id" select="./@xml:id"/>
-    <xsl:variable name="start" select="substring-before(./@synch, '-')"/>
-    <xsl:variable name="end" select="substring-after(./@synch, '-')"/>
+    <xsl:variable name="targetRange" select="./@synch"/>
     <xsl:choose>
       <xsl:when test="($isDiplomatic = 'true') and $id and contains($target, 'http://scta.info/resource/')">
         <!-- added data-target-paragraph attribut here because it is hard for jquery to get id in html dom -->
-        <span id="{@xml:id}" 
-          class="lbp-ref js-show-info lbp-ref-clickable js-show-reference-paragraph" 
-          data-pid="{$id}" 
-          data-url="{$target}"
-          data-ref="{$refid}" 
-          data-corresp="{$corresp}"
-          data-target-resource="{$id}"
-          data-start="{$start}" data-end="{$end}">
-          <xsl:text></xsl:text>
+        <span id="{@xml:id}" class="lbp-ref js-show-info lbp-ref-clickable js-show-reference-paragraph" data-pid="{$id}" data-url="{$target}" data-ref="{$refid}" data-corresp="{$corresp}" data-target-resource="{$id}" data-target-range="{$targetRange}">
+          <xsl:text/>
           <xsl:apply-templates/>
-          <xsl:text></xsl:text>
+          <xsl:text/>
         </span>
       </xsl:when>
       <xsl:when test="($isDiplomatic = 'true') and $id">
         <span id="{@xml:id}" class="lbp-ref js-show-info lbp-ref-clickable" data-pid="{$id}" data-ref="{$refid}" data-corresp="{$corresp}">
-          <xsl:text></xsl:text>
+          <xsl:text/>
           <xsl:apply-templates/>
-          <xsl:text></xsl:text>
+          <xsl:text/>
         </span>
       </xsl:when>
       <xsl:otherwise>
@@ -295,7 +282,7 @@
   <!-- if graphic element is present display description -->
   <xsl:template match="tei:graphic">
     <xsl:if test="./@url">
-      <img src="{./@url}" width="50%"/>
+        <img src="{./@url}" width="50%"/>
     </xsl:if>
     <xsl:apply-templates/>
   </xsl:template>
@@ -503,7 +490,8 @@
       <xsl:variable name="surfaceid">
         <xsl:value-of select="concat($default-msslug, '/', $folio, $side)"/>
       </xsl:variable>
-      <br/> <span class="lbp-line-number" data-break="{$break}" data-ln="{$lineNumber}" data-pb="{$pbNumber}" data-codex="{$default-msslug}" data-surfaceid="{$surfaceid}"><xsl:value-of select="$lineNumber"/> </span>
+      <br/> <span class="lbp-line-number" data-break="{$break}" data-ln="{$lineNumber}" data-pb="{$pbNumber}" data-codex="{$default-msslug}" data-surfaceid="{$surfaceid}">
+                <xsl:value-of select="$lineNumber"/> </span>
     </xsl:if>
   </xsl:template>
   <!-- END line number creation -->
@@ -711,12 +699,12 @@
   </xsl:template>
   <xsl:template name="quote-bibl">
     <xsl:variable name="source" select="./tei:quote[1]/@source"/>
-    <xsl:variable name="start" select="substring-before(./tei:quote[1]/@synch, '-')"/>
-    <xsl:variable name="end" select="substring-after(./tei:quote[1]/@synch, '-')"/>
+    <xsl:variable name="targetRange" select="./tei:quote[1]/@synch"/>
+
     <xsl:choose>
       <xsl:when test="contains($source, 'http://scta.info/resource/')">
         <!-- added data-target-paragraph attribut here because it is hard for jquery to get id in html dom -->
-        <a href="{$source}" data-url="{$source}" class="js-show-reference-paragraph" data-target-resource="{./tei:quote[1]/@xml:id}" data-start="{$start}" data-end="{$end}">
+        <a href="{$source}" data-url="{$source}" class="js-show-reference-paragraph" data-target-resource="{./tei:quote[1]/@xml:id}" data-target-range="{$targetRange}">
           <xsl:choose>
             <xsl:when test="./tei:bibl">
               <xsl:apply-templates select="./tei:bibl"/>
@@ -735,12 +723,12 @@
   </xsl:template>
   <xsl:template name="ref-bibl">
     <xsl:variable name="target" select="./tei:ref[1]/@target"/>
-    <xsl:variable name="start" select="substring-before(./tei:ref[1]/@synch, '-')"/>
-    <xsl:variable name="end" select="substring-after(./tei:ref[1]/@synch, '-')"/>
+    <xsl:variable name="targetRange" select="./tei:ref[1]/@synch"/>
+
     <xsl:choose>
       <xsl:when test="contains($target, 'http://scta.info/resource/')">
         <!-- added data-target-paragraph attribute here because it is hard for jquery to get id in html dom -->
-        <a href="{$target}" data-url="{$target}" class="js-show-reference-paragraph" data-target-resource="{./tei:ref[1]/@xml:id}" data-start="{$start}" data-end="{$end}">
+        <a href="{$target}" data-url="{$target}" class="js-show-reference-paragraph" data-target-resource="{./tei:ref[1]/@xml:id}" data-target-range="{$targetRange}">
           <xsl:choose>
             <xsl:when test="./tei:bibl">
               <xsl:apply-templates select="./tei:bibl"/>
