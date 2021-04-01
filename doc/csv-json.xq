@@ -3,9 +3,8 @@ xquery version "3.0";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace sparql = "http://www.w3.org/2005/sparql-results#";
-declare option exist:serialize "method=text media-type=text/plain";
-(:(:declare option output:method "json";:):)
-(:(:declare option output:media-type "application/json";:):)
+declare option output:method "json";
+declare option output:media-type "application/json";
 
                     
 import module namespace http = "http://expath.org/ns/http-client" at "/http-client/http-client.xq";
@@ -183,10 +182,8 @@ $sparql-result := http:send-request(
               concat("tmp:", $cid, ":", generate-id($p))
 
           return
-              if ($format eq 'text') then
-                  $textClean
-              else
-                  concat($id, ",", $textClean, ", ", $cid, $nl)
-                
-              
+              map{
+                "block": concat("http://scta.info/resource/", string($id)),
+                "text": $textClean
+              }
                   

@@ -5,6 +5,8 @@ declare variable $exist:controller external;
 declare variable $exist:resource external;
 declare variable $exist:prefix external;
 
+
+
 (: handle a request like /iiif/pp-reims/search?q=fides :)
   if (starts-with($exist:path, '/iiif/')) then
     let $fragments := substring-after($exist:path, '/iiif/')
@@ -36,16 +38,18 @@ declare variable $exist:prefix external;
     let $filepath := substring-after($exist:path, '/text/')
     let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
     return
-
+        
       <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
         <forward url="{$exist:controller}/../scta-data/{$filepath}">
         </forward>
       </dispatch>
   else if (starts-with($exist:path, '/csv/')) then
     let $transcriptionid := substring-after($exist:path, '/csv/')
+    let $csv-format := request:get-parameter('format', '')
+    let $file := if ($csv-format eq 'json') then "csv-json" else "csv"
     return
       <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
-        <forward url="{$exist:controller}/doc/csv.xq">
+        <forward url="{$exist:controller}/doc/{$file}.xq">
           <add-parameter name="transcriptionid" value="{$transcriptionid}"/>
         </forward>
       </dispatch>
