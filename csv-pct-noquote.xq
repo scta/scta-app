@@ -29,6 +29,7 @@ declare function local:render($node, $show_quote, $show_pct) {
         case element (tei:note) return ()
         case element (tei:orig) return ()
         case element (tei:corr) return ()
+        case element (tei:del) return ()
         case element (tei:lb) return ()
         case element (tei:head) return ()
         default return local:recurse($node, $show_quote, $show_pct)
