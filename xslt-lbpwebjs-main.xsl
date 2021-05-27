@@ -178,15 +178,26 @@
   <!-- quote template -->
   <xsl:template match="tei:quote">
     <xsl:variable name="quoterefid" select="translate(./@ana, '#', '')"/>
-    <xsl:variable name="source" select="./@source"/>
     <xsl:variable name="id" select="./@xml:id"/>
     <xsl:variable name="targetRange" select="./@synch"/>
+    <xsl:variable name="source" select="tokenize(./@source, '@')[1]"/>
+    <!-- conditional here to maintain functionality with old synch method, but handle wordRange as part of id -->
+    <xsl:variable name="targetRange">
+        <xsl:choose>
+            <xsl:when test="tokenize(./@source, '@')[2]">
+                <xsl:value-of select="tokenize(./@source, '@')[2]"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="./@synch"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+    
     
     <xsl:choose>
       <xsl:when test="($isDiplomatic = 'true') and $id and contains($source, 'http://scta.info/resource/')">
         <!-- added data-target-paragraph attribut here because it is hard for jquery to get id in html dom -->
-        <span id="{@xml:id}" class="lbp-quote js-show-info lbp-quote-clickable js-show-reference-paragraph" data-pid="{$id}" data-url="{$source}" data-target-resource="{$id}" 
-        data-target-range="{$targetRange}">
+        <span id="{@xml:id}" class="lbp-quote js-show-info lbp-quote-clickable js-show-reference-paragraph" data-pid="{$id}" data-url="{$source}" data-target-resource="{$id}" data-target-range="{$targetRange}">
           <xsl:text/>
           <xsl:apply-templates/>
           <xsl:text/>
@@ -213,9 +224,21 @@
   <xsl:template match="tei:ref">
     <xsl:variable name="refid" select="translate(./@ana, '#', '')"/>
     <xsl:variable name="corresp" select="translate(./@corresp, '#', '')"/>
-    <xsl:variable name="target" select="./@target"/>
     <xsl:variable name="id" select="./@xml:id"/>
-    <xsl:variable name="targetRange" select="./@synch"/>
+    <xsl:variable name="target" select="tokenize(./@target, '@')[1]"/>
+    <!-- conditional here to maintain functionality with old synch method, but handle wordRange as part of id -->
+    <xsl:variable name="targetRange">
+        <xsl:choose>
+            <xsl:when test="tokenize(./@target, '@')[2]">
+                <xsl:value-of select="tokenize(./@target, '@')[2]"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="./@synch"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+    
+    
     <xsl:choose>
       <xsl:when test="($isDiplomatic = 'true') and $id and contains($target, 'http://scta.info/resource/')">
         <!-- added data-target-paragraph attribut here because it is hard for jquery to get id in html dom -->
@@ -698,8 +721,20 @@
     </ul>
   </xsl:template>
   <xsl:template name="quote-bibl">
-    <xsl:variable name="source" select="./tei:quote[1]/@source"/>
-    <xsl:variable name="targetRange" select="./tei:quote[1]/@synch"/>
+    <xsl:variable name="source" select="tokenize(./tei:quote[1]/@source, '@')[1]"/>
+    
+    <!-- conditional here to maintain functionality with old synch method, but handle wordRange as part of id -->
+    <xsl:variable name="targetRange">
+        <xsl:choose>
+            <xsl:when test="tokenize(./tei:quote[1]/@source, '@')[2]">
+                <xsl:value-of select="tokenize(./tei:quote[1]/@source, '@')[2]"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="./tei:quote[1]/@synch"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+    
 
     <xsl:choose>
       <xsl:when test="contains($source, 'http://scta.info/resource/')">
@@ -722,8 +757,18 @@
     </xsl:choose>
   </xsl:template>
   <xsl:template name="ref-bibl">
-    <xsl:variable name="target" select="./tei:ref[1]/@target"/>
-    <xsl:variable name="targetRange" select="./tei:ref[1]/@synch"/>
+    <xsl:variable name="target" select="tokenize(./tei:ref[1]/@target, '@')[1]"/>
+    <!-- conditional here to maintain functionality with old synch method, but handle wordRange as part of id -->
+    <xsl:variable name="targetRange">
+        <xsl:choose>
+            <xsl:when test="tokenize(./tei:ref[1]/@target, '@')[2]">
+                <xsl:value-of select="tokenize(./tei:ref[1]/@target, '@')[2]"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="./tei:ref[1]/@synch"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
 
     <xsl:choose>
       <xsl:when test="contains($target, 'http://scta.info/resource/')">
