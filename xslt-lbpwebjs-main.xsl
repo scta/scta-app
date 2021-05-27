@@ -302,17 +302,13 @@
     <xsl:apply-templates/>
   </xsl:template> -->
 
-  <!-- if graphic element is present display description -->
-  <xsl:template match="tei:graphic">
-    <xsl:if test="./@url">
-        <img src="{./@url}" width="50%"/>
+  <!-- if figure element is present display description -->
+  <xsl:template match="tei:figure">
+    <xsl:if test="./tei:graphic/@url">
+        <img id="{./@id}" src="{./tei:graphic/@url}" width="50%"/>
     </xsl:if>
-    <xsl:apply-templates/>
   </xsl:template>
-  <xsl:template match="tei:graphic/tei:desc">
-    [<xsl:apply-templates/>]
-  </xsl:template>
-  <!-- end graphic element handle -->
+  <!-- end figure element handle -->
 
   <!-- clear rdg template -->
   <xsl:template match="tei:rdg"/>
