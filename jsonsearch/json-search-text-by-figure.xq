@@ -18,7 +18,7 @@ declare option output:media-type "application/json";
 let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
 
 let $start-time := util:system-time()
-let $q := request:get-parameter('query', 'figure')
+let $q := request:get-parameter('query', 'compass')
 let $commentaryid := request:get-parameter('expressionid', 'M8ag89')
 let $docs :=
     if ($commentaryid = "all") then
@@ -54,7 +54,8 @@ let $docs :=
 (:                    console:log(concat('use canonical: /db/apps/scta-data/', $commentaryid, '/', $collection, '/', $collection, '.xml')):)
                     )
 
-let $hits := $docs//tei:body//tei:graphic
+let $hits := $docs//tei:body//tei:figure[ft:query(., $q)]
+
 let $end-time := util:system-time()
 let $duration := $end-time - $start-time
 let $minutes := minutes-from-duration($duration)
@@ -68,9 +69,9 @@ return
         (: get parrent id :)
         let $pid := $hit/parent::tei:p/@xml:id/string()
         (: id of graphic :)
-        let $graphicid := $hit/@xml:id/string()
+        let $figureid := $hit/@xml:id/string()
         let $itemtitle := $hit/preceding::tei:titleStmt/tei:title/string()
-        let $imgurl := $hit/@url/string()
+        let $imgurl := $hit/tei:graphic/@url/string()
         
         
         
@@ -86,7 +87,7 @@ return
             
             return 
                 map{
-                "id": $graphicid,
+                "id": $figureid,
                 "pid": $pid,
                 "index": $index,
 (:                "start": $precedingCount/start/text(),:)
