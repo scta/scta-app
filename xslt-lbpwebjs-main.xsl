@@ -461,7 +461,16 @@
   <xsl:template match="tei:body//tei:lb[not(parent::tei:reg)]">
     <!-- first check global setting to see if line breaks should be shown -->
     <xsl:if test="$show-line-breaks = 'true'">
-      <xsl:variable name="pbNumber" select="./preceding::tei:pb[1]/@n"/>
+      <xsl:variable name="pbNumber">
+        <xsl:choose>
+            <xsl:when test="contains(./@type, 'fixed')">
+                <xsl:value-of select="tokenize(./@type, '=')[2]"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="./preceding::tei:pb[1]/@n"/>   
+            </xsl:otherwise>
+      </xsl:choose>
+      </xsl:variable>
       <xsl:variable name="break" select="./@break"/>
       <xsl:variable name="lineNumber">
         <xsl:choose>
