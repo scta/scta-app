@@ -14,7 +14,7 @@ declare function gitarc:getArchiveUrl($owner, $repo, $access_token){
 
 declare function local:download-and-unpack-zip-archive($archive-url as xs:string, $destination as xs:string) as xs:string {
     let $download-temp-folder :=
-        if (xmldb:collection-available("/db/http-download-temp")) then
+        if (xmldb:collection-available("/db/apps/scta-data/http-download-temp")) then
             "/db/apps/scta-data/http-download-temp"
         else
             xmldb:create-collection("/db/apps/scta-data", "http-download-temp")
