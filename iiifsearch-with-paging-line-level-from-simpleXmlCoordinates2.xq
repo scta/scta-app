@@ -145,7 +145,14 @@ let $docs := collection(concat('/db/apps/simpleXmlCoordinates/', $item))
 let $start:= xs:integer(request:get-parameter("start", "1"))
 let $records := xs:integer(request:get-parameter("records", "5"))
 let $page := request:get-parameter("page","1")
-let $allHits := $docs//new:text[ft:query(., $q)]
+let $options :=
+    <options>
+        <default-operator>or</default-operator>
+        <phrase-slop>0</phrase-slop>
+        <leading-wildcard>no</leading-wildcard>
+        <filter-rewrite>yes</filter-rewrite>
+    </options>
+let $allHits := $docs//new:text[ft:query(., $q, $options)]
 
 let $firstPage := 1
 
