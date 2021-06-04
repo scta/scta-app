@@ -61,7 +61,7 @@ declare function local:replaceCollection($owner, $repo, $access_token) {
 declare function local:files($before, $after, $owner, $repo, $access_token){
 
   let $url := "https://api.github.com/repos/" || $owner ||"/" || $repo || "/compare/" || $before ||"..." || $after || "?access_token=" || $access_token
-  let $request := <http:request method="GET" href="{$url}" timeout="60"/>
+  let $request := <http:request method="GET" href="{$url}" timeout="1000"/>
   let $response := http:send-request($request)
   let $shortid := $repo
   let $top_level_collection := local:topLevelCollectionQuery($shortid)
@@ -99,7 +99,7 @@ declare function local:files($before, $after, $owner, $repo, $access_token){
         if ($file?status = 'added' or $file?status = 'modified') then
           let $url := $file?contents_url || "&amp;access_token=" || $access_token
           (: let $url := "https://api.github.com/repos/" || $owner ||"/" || $repo || "/contents/" || $file?filename || "?ref=" || $after || "&amp;access_token=" || $access_token :)
-          let $request := <http:request method="GET" href="{$url}" timeout="30"/>
+          let $request := <http:request method="GET" href="{$url}" timeout="1000"/>
           let $response := http:send-request($request)
           let $new-content := util:base64-decode(parse-json(util:binary-to-string($response[2]))?content)
           return

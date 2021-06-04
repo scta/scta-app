@@ -4,13 +4,16 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 declare option exist:serialize "method=html media-type=text/html ident=no";
 
-let $commentaryid := request:get-parameter('commentaryid', 'liberextra')
-let $collection := concat("scta-data", "/", $commentaryid)
+let $commentaryid := request:get-parameter('commentaryid', 'graciliscommentary')
+let $itemid := request:get-parameter('itemid', 'pg-b1q2')
+let $mid := request:get-parameter('mid', 'lon')
+
+let $collection := concat("scta-data", "/", $commentaryid, "/", $itemid, "/", $mid, "_", $itemid, ".xml")
 let $terms :=
     <terms>
         {
             util:index-keys(
-                collection(concat("/db/apps/", $collection))//tei:p,
+                doc(concat("/db/apps/", $collection))//tei:p,
                 "",
                 function($key, $count) {
                     <term name="{$key}" count="{$count[1]}"
