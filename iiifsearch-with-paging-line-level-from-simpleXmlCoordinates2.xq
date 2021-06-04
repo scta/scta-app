@@ -109,7 +109,8 @@ let $manifestationid := $codex
 let $url := "https://sparql-docker.scta.info/ds/query?query="
 (: let $url := "http://localhost:3030/ds/query?query=" :)
 let $sparql := if ($codex != '') then
-    local:getCodex($codex)
+    (: add [1] here in case two codex identical codex parameters were passed     :)
+    local:getCodex($codex[1])
   else if ($institution) then
     local:getAllCodicesByInstitution($institution)
   else if ($afterDate) then
@@ -132,7 +133,8 @@ for $result in $sparql-result//sparql:result
 
   let $url-array := fn:tokenize($result/sparql:binding[@name="codex"]/sparql:uri/text(), "/")
   let $item := if ($codex != '') then
-      $codex
+    (: add [1] here in case two codex identical codex parameters were passed     :)
+      $codex[1]
     else
       $url-array[last()]
 
