@@ -54,7 +54,14 @@ let $docs :=
 (:                    console:log(concat('use canonical: /db/apps/scta-data/', $commentaryid, '/', $collection, '/', $collection, '.xml')):)
                     )
 
-let $hits := $docs//tei:body//tei:figure[ft:query(., $q)]
+let $hits := if ($q eq 'all') then 
+                (
+                    $docs//tei:body//tei:figure
+                )
+                else
+                (
+                    $docs//tei:body//tei:figure[ft:query(., $q)]
+                )
 
 let $end-time := util:system-time()
 let $duration := $end-time - $start-time
