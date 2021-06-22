@@ -74,7 +74,8 @@ return
         "results":
         for $hit at $index in $hits
         (: get parrent id :)
-        let $pid := $hit/parent::tei:p/@xml:id/string()
+(:        let $pid := $hit/parent::tei:p/@xml:id/string():)
+        let $pid := $hit/@xml:id/string()
         (: id of graphic :)
         let $figureid := $hit/@xml:id/string()
         let $itemtitle := $hit/preceding::tei:titleStmt/tei:title/string()

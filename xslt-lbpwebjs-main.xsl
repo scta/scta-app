@@ -305,7 +305,7 @@
   <!-- if figure element is present display description -->
   <xsl:template match="tei:figure">
     <xsl:if test="./tei:graphic/@url">
-        <img id="{./@id}" src="{./tei:graphic/@url}" width="50%"/>
+        <img id="{./@xml:id}" src="{./tei:graphic/@url}" width="50%"/>
     </xsl:if>
   </xsl:template>
   <!-- end figure element handle -->
