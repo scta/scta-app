@@ -11,6 +11,7 @@
       </body>
     </html>
   </xsl:template>
+  <xsl:template match="note"/>
   <xsl:template match="cit">
     
     <p>
