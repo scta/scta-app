@@ -39,3 +39,12 @@ declare function _:getTokenPosition($node, $index as xs:integer){
 
 };
 
+declare function _:filter($node as node(), $mode as xs:string) as xs:string? {
+  if ($node/parent::rdg or $node/parent::bibl or $node/parent::note) then 
+      ()
+  else if ($mode eq 'before') then 
+      concat($node, ' ')
+  else 
+      concat(' ', $node)
+};
+

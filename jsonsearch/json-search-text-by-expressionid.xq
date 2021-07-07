@@ -75,7 +75,8 @@ return
         order by ft:score($hit) descending
         
         return
-            
+(:            commented line should use third parameter to filter unwanted elements like rdg, note, and bible; but it is currently not working:)
+(:            let $summarize := kwic:summarize($hit, <config width="100"/>, util:function(xs:QName("jssearchutils:filter"), 2)):)
             let $summarize := kwic:summarize($hit, <config width="100"/>)
             for $item at $index in $summarize
             let $precedingCount := jssearchutils:getTokenPosition(jssearchutils:render(kwic:expand($hit)), $index)
