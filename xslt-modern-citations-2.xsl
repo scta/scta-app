@@ -31,6 +31,9 @@
   
   <xsl:template match="/">
     <html>
+    <head>
+    <meta charset="utf-8"/>
+    </head>
       <body>
         <xsl:for-each select="$items//item">
           <xsl:variable name="docName" select="concat('https://exist.scta.info/exist/apps/scta-app/text/graciliscommentary/', ., '/', ., '.xml')"/>
