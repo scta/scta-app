@@ -675,12 +675,12 @@
         <div id="sources">
           Sources:
           <xsl:for-each select="//tei:sourceDesc/tei:listWit/tei:witness[@n|text()]">
-            <a style="padding-left: 10px" href="/#/text?resourceid=http://scta.info/resource/{./@n}">
+            <a style="padding-left: 10px" href="/res?resourceid=http://scta.info/resource/{./@n}">
                                 <xsl:value-of select="./@xml:id"/>: <xsl:value-of select="."/>
                             </a>
           </xsl:for-each>
           <xsl:for-each select="//tei:sourceDesc/tei:listBibl/tei:bibl">
-            <a style="padding-left: 10px" href="/#/text?resourceid=http://scta.info/resource/{./@n}">
+            <a style="padding-left: 10px" href="/res?resourceid=http://scta.info/resource/{./@n}">
                                 <xsl:value-of select="./@xml:id"/>: <xsl:value-of select="."/>
                             </a>
           </xsl:for-each>
