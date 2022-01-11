@@ -93,7 +93,7 @@ let $wgid := request:get-parameter('wgid', '')
 let $eid := request:get-parameter('eid', '')
 let $aid := request:get-parameter('aid', '')
 let $etid := request:get-parameter('etid', '')
-let $searchType := request:get-parameter('searchType', 'figure')
+let $searchType := request:get-parameter('searchType', 'text')
 let $url := "http://sparql-docker.scta.info/ds/query?query=",
 $sparql := local:getSparqlQuery($wgid, $etid, $aid, $eid),
 $encoded-sparql := encode-for-uri($sparql),
@@ -120,7 +120,7 @@ $sparql-result := http:send-request(
                         concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $itemid, '.xml')
             return 
                 <doc>{$doc}</doc>
-    let $query := request:get-parameter('query', 'all')
+    let $query := request:get-parameter('query', '')
     let $allHits := if ($query != '') 
         then (
             for $doc in $combinedDocs
