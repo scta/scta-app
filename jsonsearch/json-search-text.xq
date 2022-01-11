@@ -93,6 +93,7 @@ let $wgid := request:get-parameter('wgid', '')
 let $eid := request:get-parameter('eid', '')
 let $aid := request:get-parameter('aid', '')
 let $etid := request:get-parameter('etid', '')
+let $searchType := request:get-parameter('searchType', 'figure')
 let $url := "http://sparql-docker.scta.info/ds/query?query=",
 $sparql := local:getSparqlQuery($wgid, $etid, $aid, $eid),
 $encoded-sparql := encode-for-uri($sparql),
@@ -119,12 +120,23 @@ $sparql-result := http:send-request(
                         concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $itemid, '.xml')
             return 
                 <doc>{$doc}</doc>
-    let $query := request:get-parameter('query', 'quod')
+    let $query := request:get-parameter('query', 'all')
     let $allHits := if ($query != '') 
         then (
             for $doc in $combinedDocs
                 return 
-                    doc($doc)//tei:p[ft:query(., $query)]
+                    if ($searchType eq "figure") then 
+                        (
+                            if ($query eq 'all') then(
+                                doc($doc)//tei:figure
+                            )   
+                            else(
+                                doc($doc)//tei:figure[ft:query(., $query)]
+                            )
+                        )
+                        else (
+                            doc($doc)//tei:p[ft:query(., $query)]
+                        )
         )
         else ()
     
@@ -135,15 +147,30 @@ map {
     "totalCount": count($allHits),
     "results": 
 
-        for $hit in $hits
+        for $hit at $index in $hits
 
             let $pid := $hit/@xml:id/string()
             order by ft:score($hit) descending
             return
-                let $summarize := kwic:summarize($hit, <config width="100"/>)
-                for $item at $index in $summarize
-                let $precedingCount := jssearchutils:getTokenPosition(jssearchutils:render(kwic:expand($hit)), $index)
-                let $getSummary := jssearchutils:render(kwic:expand($hit))
+                if ($searchType eq "figure") then (
+                    let $pid := $hit/@xml:id/string()
+                    let $figureid := $hit/@xml:id/string()
+                    let $itemtitle := $hit/preceding::tei:titleStmt/tei:title/string()
+                    let $imgurl := $hit/tei:graphic/@url/string()
+                    order by ft:score($hit) descending
+                return 
+                map{
+                "id": $figureid,
+                "pid": $pid,
+                "index": $index,
+                "imgurl": $imgurl
+                }
+                )
+                else (
+                    let $summarize := kwic:summarize($hit, <config width="100"/>)
+                    for $item at $index in $summarize
+                    let $precedingCount := jssearchutils:getTokenPosition(jssearchutils:render(kwic:expand($hit)), $index)
+                    let $getSummary := jssearchutils:render(kwic:expand($hit))
 
                 return 
                     map{
@@ -154,6 +181,9 @@ map {
                     "hit": normalize-space(jssearchutils:render(util:expand($item/span[@class='hi']))),
                     "previous": normalize-space(jssearchutils:render(util:expand($item/span[@class='previous']))),
                     "next": normalize-space(jssearchutils:render(util:expand($item/span[@class='following'])))
-                }
+                    }
+                )
+                
+            
         }
     
