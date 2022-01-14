@@ -119,28 +119,26 @@ $sparql-result := http:send-request(
                         else
                         concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $itemid, '.xml')
             return 
-                <doc>{$doc}</doc>
+                doc($doc)
     let $query := request:get-parameter('query', '')
     let $allHits := if ($query != '') 
         then (
-            for $doc in $combinedDocs
-                return 
-                    if ($searchType eq "figure") then 
-                        (
-                            if ($query eq 'all') then(
-                                doc($doc)//tei:figure
-                            )   
-                            else(
-                                doc($doc)//tei:figure[ft:query(., $query)]
-                            )
-                        )
-                        else (
-                            doc($doc)//tei:p[ft:query(., $query)]
-                        )
-        )
+            if ($searchType eq "figure") then 
+                (
+                    if ($query eq 'all') then(
+                        $combinedDocs//tei:figure
+                    )   
+                    else(
+                        $combinedDocs//tei:figure[ft:query(., $query)]
+                    )
+                )
+                else (
+                    subsequence($combinedDocs//tei:p[ft:query(., $query)], 1, 10)
+                )
+            )
         else ()
     
-    let $hits := subsequence($allHits,1,1000)
+    let $hits := $allHits
 return 
     
 map {
