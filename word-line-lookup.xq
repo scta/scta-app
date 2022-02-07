@@ -18,10 +18,16 @@ declare function local:removePunctation($string) {
 
 declare function local:getSparqlQuery($tid) as xs:string {
     let $query := xs:string("
-        SELECT ?path
+        SELECT ?path ?itemShortId ?topLevelShortId
         WHERE
         {
             <" || $tid || "> <http://scta.info/property/hasDocument> ?path . 
+            <" || $tid || "> <http://scta.info/property/isTranscriptionOf> ?m . 
+            ?m <http://scta.info/property/isManifestationOf> ?e .
+            ?e <http://scta.info/property/isPartOfStructureItem> ?item . 
+            ?item <http://scta.info/property/shortId> ?itemShortId .
+            ?e <http://scta.info/property/isPartOfTopLevelExpression> ?topLevel .
+            ?topLevel <http://scta.info/property/shortId> ?topLevelShortId . 
         }
         ")
         return $query
@@ -76,7 +82,7 @@ declare function local:getTokenPosition($node, $precedingpb as xs:string){
 };
 
 let $response-header := response:set-header("Access-Control-Allow-Origin", "*")
-let $tid := request:get-parameter('tid', 'http://scta.info/resource/pgb1q1-sepicl/lon/transcription')
+let $tid := request:get-parameter('tid', 'http://scta.info/resource/b1d1q13-d1e125/maz/transcription')
 let $sparql := local:getSparqlQuery($tid)
 let $encoded-sparql := encode-for-uri($sparql)
 let $url := "http://sparql-docker.scta.info/ds/query?query="
@@ -89,9 +95,15 @@ let $path := $sparql-result//sparql:result[1]/sparql:binding[@name="path"]/sparq
 let $pathFragments := tokenize(tokenize($path, "/scta-texts/")[2], '/')
 let $fileName := tokenize($pathFragments[5], "#")[1]
 let $pxmlid := tokenize($pathFragments[5], "#")[2]
-let $docpath := "/db/apps/scta-data/" || $pathFragments[1] || "/" || $pathFragments[4] || "/" || $fileName
+let $cid := $sparql-result//sparql:result[1]/sparql:binding[@name="topLevelShortId"]/sparql:literal/text()
+let $docpath := "/db/apps/scta-data/" || $cid || "/" || $pathFragments[4] || "/" || $fileName
 let $transcription := doc($docpath)//tei:p[@xml:id=$pxmlid]
-let $precedingpb := doc($docpath)//tei:p[@xml:id=$pxmlid]/preceding::tei:pb[1]/@n
+(: preceding expath doesn't seem to be able to get starts on pb; so if no pb is found in text, the else statement goes directly to the starts on div and gets the pb:)
+let $precedingpb := if (doc($docpath)//tei:p[@xml:id=$pxmlid]//preceding::tei:pb[1]/@n) then 
+    (doc($docpath)//tei:p[@xml:id=$pxmlid]//preceding::tei:pb[1]/@n)
+    else(
+        doc($docpath)//tei:div[@xml:id='starts-on']/tei:pb/@n
+        )
 (:return local:render($transcription):)
 return local:getTokenPosition(local:render($transcription), $precedingpb)
-(: return $docpath:)
+
