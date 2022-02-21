@@ -8,10 +8,11 @@ import module namespace http = "http://expath.org/ns/http-client" at "/http-clie
 
 declare function local:getSparqlQuery($expression_id as xs:string) as xs:string {
   let $query := xs:string('
-  SELECT ?type ?item ?topLevelTranscription ?level ?author ?authorTitle
+  SELECT ?type ?item ?topLevelTranscription ?level ?author ?authorTitle ?title ?wikiDataId
   WHERE
   {
       <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/structureType> ?type .
+      <http://scta.info/resource/' || $expression_id || '> <http://purl.org/dc/elements/1.1/title> ?title .
 
       #option for top level collection expression
       OPTIONAL
@@ -69,6 +70,10 @@ declare function local:getSparqlQuery($expression_id as xs:string) as xs:string 
         ?topLevel <http://www.loc.gov/loc.terms/relators/AUT> ?author .
         ?author <http://purl.org/dc/elements/1.1/title> ?authorTitle .
       }
+      OPTIONAL{
+        ?author <http://www.w3.org/2002/07/owl#sameAs> ?wikiDataId .
+        FILTER ( strstarts(str(?wikiDataId), "http://www.wikidata.org") ) .
+      }
   }
   ORDER BY ?totalOrder
     ')
@@ -85,12 +90,14 @@ let $url := "http://sparql-docker.scta.info/ds/query?query=",
 (: let $url := "http://localhost:3030/ds/query?query=", :)
 $sparql := local:getSparqlQuery($expression_id),
 $encoded-sparql := encode-for-uri($sparql),
-
 $sparql-result := http:send-request(
    <http:request href="{concat($url, $encoded-sparql)}" method="get">
       <http:header name="accept" value="application/xml"/>
    </http:request>
 )
+let $wikiDataId := if ($sparql-result//sparql:result[1]/sparql:binding[@name="wikiDataId"]/sparql:uri/text()) then $sparql-result//sparql:result[1]/sparql:binding[@name="wikiDataId"]/sparql:uri/text() else $sparql-result//sparql:result[1]/sparql:binding[@name="author"]/sparql:uri/text()
+let $sctaAuthorId := $sparql-result//sparql:result[1]/sparql:binding[@name="author"]/sparql:uri/text()
+let $datetime := current-dateTime()
 
 return
 
@@ -98,14 +105,25 @@ return
     <teiHeader>
       <fileDesc>
         <titleStmt>
-          <title>http://scta.info/resoure/{$expression_id}</title>
-          <author ref="{$sparql-result//sparql:result[1]/sparql:binding[@name="author"]/sparql:uri/text()}">{$sparql-result//sparql:result[1]/sparql:binding[@name="authorTitle"]/sparql:literal/text()}</author>
+          <title ref="http://scta.info/resource/{$expression_id}">{$sparql-result//sparql:result[1]/sparql:binding[@name="title"]/sparql:literal/text()}</title>
+          <author ref="{$wikiDataId}">{$sparql-result//sparql:result[1]/sparql:binding[@name="authorTitle"]/sparql:literal/text()}</author>
         </titleStmt>
         <publicationStmt>
-          <p></p>
-        </publicationStmt>
+        <authority>SCTA</authority>
+        <availability status="free">
+          <p>Published under a <ref target="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</ref></p>
+        </availability>
+        <date when="{$datetime}">Compilation created on {$datetime}</date>
+      </publicationStmt>
+        <seriesStmt>
+            <title>Scholastic Commentaries and Texts Archive</title>
+            <idno>{$expression_id}</idno>
+            </seriesStmt>
         <sourceDesc>
-          <p></p>
+          <editionStmt>
+              <edition>Canonical Edition</edition>
+              <editor>Canonical edition auto composed from divisions listed as canonical in the SCTA database; canonical represents the best version possessed the SCTA and the current time of compilation; for detailed metadata about the components used to create this compilation see <ref target="http://scta.info/resource/{$expression_id}">http://scta.info/resource/{$expression_id}</ref></editor>
+          </editionStmt>
         </sourceDesc>
       </fileDesc>
     </teiHeader>
