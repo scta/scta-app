@@ -518,6 +518,7 @@
       <xsl:variable name="surfaceid">
         <xsl:value-of select="concat($default-msslug, '/', $folio, $side)"/>
       </xsl:variable>
+      <xsl:if test="$break = 'no'"><xsl:text>-</xsl:text></xsl:if>
       <br/> <span class="lbp-line-number" data-break="{$break}" data-ln="{$lineNumber}" data-pb="{$pbNumber}" data-codex="{$default-msslug}" data-surfaceid="{$surfaceid}">
                 <xsl:value-of select="$lineNumber"/> </span>
     </xsl:if>
