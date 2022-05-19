@@ -23,7 +23,7 @@ declare function local:render($node) {
 (:        case element(tei:corr) return ():)
         case element(tei:reg) return ()
         case element(tei:note) return ()
-        case element(tei:lb) return "///"
+        case element(tei:lb) return (concat("/// ", $node/@n, "-", $node/@type, " "))
         case element(tei:cb) return ()
         case element(tei:pb) return ()
         case element(tei:head) return ()
@@ -88,6 +88,8 @@ $sparql-result := http:send-request(
 return
 
     <div xmlns="http://scta.info/ns/xml-lines">
+    
+    
       {
 
 
@@ -185,15 +187,20 @@ for $result at $count in $sparql-result//sparql:result
   for $line at $pos in $stringArray
 
     let $realPosition := $pos - 1
-
+    let $lineNumber := tokenize(tokenize($line, " ")[2], '-')[1]
+    
     where $pos != 1
+    order by number($lineNumber)
     return
-      <line n="{$realPosition}">
+      <line n="{$lineNumber}">
+      
         {
           for $word at $wordPosition in tokenize($line, " ")
+          let $realWordPosition := $wordPosition - 2
           where $word[last()]
+          where $realWordPosition gt 0
           return
-            <word n="{$wordPosition}">{$word}</word>
+            <word n="{$realWordPosition}">{$word}</word>
         }
         </line>
       }
