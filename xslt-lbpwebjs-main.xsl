@@ -462,6 +462,8 @@
     <!-- first check global setting to see if line breaks should be shown -->
     <xsl:variable name="contextNode" select="."/>
     <xsl:variable name="precedingPb" select="./preceding::tei:pb[1]"/>
+    <xsl:variable name="precedingFixedLb" select="./preceding::tei:lb[contains(./@type, 'fixed')][1]"/>
+    
     <xsl:if test="$show-line-breaks = 'true'">
       <xsl:variable name="pbNumber">
         <xsl:choose>
@@ -478,8 +480,15 @@
 <!--            <xsl:when test="./preceding::tei:lb[contains(./@type, 'fixed')][1] and ./preceding::tei:lb[contains(./@type, 'fixed')][1]/tei:pb[1] eq $precedingPb">-->
 <!--                <xsl:value-of select="tokenize(./preceding::tei:lb[contains(./@type, 'fixed')][1]/@type, '=')[2]"/>-->
 <!--            </xsl:when>-->
+            <xsl:when test="tokenize(./preceding::tei:pb[1]/preceding::tei:lb[contains(./@type, 'fixed')][1]/@type, '=')[2] eq tokenize($precedingFixedLb/@type, '=')[2]">
+                <xsl:value-of select="./preceding::tei:pb[1]/@n"/>   
+            </xsl:when>
+            <xsl:when test="./preceding::tei:lb[contains(./@type, 'fixed')][1]">
+                <xsl:value-of select="tokenize(./preceding::tei:lb[contains(./@type, 'fixed')][1]/@type, '=')[2]"/>
+            </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="./preceding::tei:pb[1]/@n"/>   
+                
             </xsl:otherwise>
       </xsl:choose>
       </xsl:variable>
