@@ -326,13 +326,43 @@
         </xsl:variable>
   	<!-- get side from previous pb -->
     <xsl:variable name="folio-and-side">
-      <!-- TODO preceding not working in column A cases where pagebreak is preceding sibling -->
-      <xsl:choose>
-        <xsl:when test="./preceding-sibling::tei:pb[1]">
-          <xsl:value-of select="./preceding-sibling::tei:pb[@ed=$hashms][1]/@n"/>
+        <xsl:choose>
+            <xsl:when test="$isDiplomatic = 'true'">
+            <!-- first check global setting to see if line breaks should be shown -->
+                <xsl:variable name="cbPrecedingFixedLb" select="./preceding::tei:lb[contains(./@type, 'fixed')][1]"/>
+                
+                <xsl:choose>
+                <xsl:when test="contains(./@type, 'fixed')">
+                    <xsl:value-of select="tokenize(./@type, '=')[2]"/>
+                </xsl:when>
+                <!-- TODO needs more testing but seems to be working
+                this test should look for first preceding pb and then see if the first lb with @type=fixed preceding this pb 
+                is equal to the first lb preceding the context cb. 
+                If so we can conclude that that the pb comes in between the lb@type fixed and the context cb 
+                and therefore the @n value of the pb should be used
+                -->
+                <xsl:when test="tokenize(./preceding::tei:pb[1]/preceding::tei:lb[contains(./@type, 'fixed')][1]/@type, '=')[2] eq tokenize($cbPrecedingFixedLb/@type, '=')[2]">
+                    <xsl:value-of select="./preceding::tei:pb[1]/@n"/>   
+                </xsl:when>
+                <xsl:when test="./preceding::tei:lb[contains(./@type, 'fixed')][1]">
+                    <xsl:value-of select="tokenize(./preceding::tei:lb[contains(./@type, 'fixed')][1]/@type, '=')[2]"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="./preceding::tei:pb[1]/@n"/>   
+                    
+                </xsl:otherwise>
+            </xsl:choose>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="./preceding::tei:pb[@ed=$hashms][1]/@n"/>
+          <!-- TODO preceding not working in column A cases where pagebreak is preceding sibling -->
+          <xsl:choose>
+            <xsl:when test="./preceding-sibling::tei:pb[1]">
+              <xsl:value-of select="./preceding-sibling::tei:pb[@ed=$hashms][1]/@n"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="./preceding::tei:pb[@ed=$hashms][1]/@n"/>
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
@@ -470,16 +500,14 @@
             <xsl:when test="contains(./@type, 'fixed')">
                 <xsl:value-of select="tokenize(./@type, '=')[2]"/>
             </xsl:when>
-            <!-- TODO needs more testing
-            but this test should look for first preceding lb with @type=fixed 
-            whose first preceding pb is identical to the first pb that precedes the current context lb.
-            Basically, the point is to make sure there is no pb after this lb@type=fixed.
-            If there is a following pb, then the page number of this pb should be used, 
-            which is accomplished in the otherwise statement
+            <!-- TODO needs more testing but seems to be working
+                this test should look for first preceding pb 
+                and then see if if the first lb with @type=fixed preceding this pb 
+                is equal to the first lb preceding the context lb. 
+                If so we can conclude that that the pb comes in between the lb@type fixed and the context lb 
+                and therefore the @n value of the pb should be used
             -->
-<!--            <xsl:when test="./preceding::tei:lb[contains(./@type, 'fixed')][1] and ./preceding::tei:lb[contains(./@type, 'fixed')][1]/tei:pb[1] eq $precedingPb">-->
-<!--                <xsl:value-of select="tokenize(./preceding::tei:lb[contains(./@type, 'fixed')][1]/@type, '=')[2]"/>-->
-<!--            </xsl:when>-->
+
             <xsl:when test="tokenize(./preceding::tei:pb[1]/preceding::tei:lb[contains(./@type, 'fixed')][1]/@type, '=')[2] eq tokenize($precedingFixedLb/@type, '=')[2]">
                 <xsl:value-of select="./preceding::tei:pb[1]/@n"/>   
             </xsl:when>
