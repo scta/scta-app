@@ -460,11 +460,23 @@
   <!-- line numbers -->
   <xsl:template match="tei:body//tei:lb[not(parent::tei:reg)]">
     <!-- first check global setting to see if line breaks should be shown -->
+    <xsl:variable name="contextNode" select="."/>
+    <xsl:variable name="precedingPb" select="./preceding::tei:pb[1]"/>
     <xsl:if test="$show-line-breaks = 'true'">
       <xsl:variable name="pbNumber">
         <xsl:choose>
             <xsl:when test="contains(./@type, 'fixed')">
                 <xsl:value-of select="tokenize(./@type, '=')[2]"/>
+            </xsl:when>
+            <!-- TODO needs more testing
+            but this test should look for first preceding lb with @type=fixed 
+            whose first preceding pb is identical to the first pb that precedes the current context lb.
+            Basically, the point is to make sure there is no pb after this lb@type=fixed.
+            If there is a following pb, then the page number of this pb should be used, 
+            which is accomplished in the otherwise statement
+            -->
+            <xsl:when test="./preceding::tei:lb[contains(./@type, 'fixed')][1] and ./preceding::tei:lb[contains(./@type, 'fixed')][1]/tei:pb[1] eq $precedingPb">
+                <xsl:value-of select="tokenize(./preceding::tei:lb[contains(./@type, 'fixed')][1]/@type, '=')[2]"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="./preceding::tei:pb[1]/@n"/>   
