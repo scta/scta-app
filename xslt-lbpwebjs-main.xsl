@@ -475,9 +475,9 @@
             If there is a following pb, then the page number of this pb should be used, 
             which is accomplished in the otherwise statement
             -->
-            <xsl:when test="./preceding::tei:lb[contains(./@type, 'fixed')][1] and ./preceding::tei:lb[contains(./@type, 'fixed')][1]/tei:pb[1] eq $precedingPb">
-                <xsl:value-of select="tokenize(./preceding::tei:lb[contains(./@type, 'fixed')][1]/@type, '=')[2]"/>
-            </xsl:when>
+<!--            <xsl:when test="./preceding::tei:lb[contains(./@type, 'fixed')][1] and ./preceding::tei:lb[contains(./@type, 'fixed')][1]/tei:pb[1] eq $precedingPb">-->
+<!--                <xsl:value-of select="tokenize(./preceding::tei:lb[contains(./@type, 'fixed')][1]/@type, '=')[2]"/>-->
+<!--            </xsl:when>-->
             <xsl:otherwise>
                 <xsl:value-of select="./preceding::tei:pb[1]/@n"/>   
             </xsl:otherwise>
