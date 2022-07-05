@@ -72,7 +72,7 @@ declare function local:recurse($node, $show_quote, $show_pct) {
 
 declare function local:getSparqlQuery($transcription_id as xs:string) as xs:string {
   let $query := xs:string('
-  SELECT ?type ?item ?topLevelTranscription ?level
+  SELECT ?type ?item ?topLevelTranscription ?level ?order
   WHERE
   {
       <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/structureType> ?type .
@@ -82,25 +82,38 @@ declare function local:getSparqlQuery($transcription_id as xs:string) as xs:stri
       {
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/level> ?level .
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/hasStructureItem> ?item .
+        ?item <http://scta.info/property/isTranscriptionOf> ?m .
+        ?m <http://scta.info/property/isManifestationOf> ?e .
+        ?e <http://scta.info/property/totalOrderNumber> ?order .
       }
       #option for non top level collection
       OPTIONAL
       {
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/hasStructureItem> ?item .
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfTopLevelTranscription> ?topLevelTranscription .
+        ?item <http://scta.info/property/isTranscriptionOf> ?m .
+        ?m <http://scta.info/property/isManifestationOf> ?e .
+        ?e <http://scta.info/property/totalOrderNumber> ?order .
       }
       # option for division or block
       OPTIONAL
       {
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfStructureItem> ?item .
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfTopLevelTranscription> ?topLevelTranscription .
+        ?item <http://scta.info/property/isTranscriptionOf> ?m .
+        ?m <http://scta.info/property/isManifestationOf> ?e .
+        ?e <http://scta.info/property/totalOrderNumber> ?order .
       }
       #option for structureItem
       OPTIONAL
       {
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfTopLevelTranscription> ?topLevelTranscription .
+        <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isTranscriptionOf> ?m .
+        ?m <http://scta.info/property/isManifestationOf> ?e .
+        ?e <http://scta.info/property/totalOrderNumber> ?order .
       }
   }
+  ORDER BY ?order
     ')
     return $query
 };
