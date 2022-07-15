@@ -184,11 +184,6 @@ for $result at $count in $sparql-result//sparql:result
   let $current_offset := ($count * 200) + 10
 
   let $stringArray := local:getLineArray(normalize-space(string-join(local:render($node))))
-(:  return :)
-(:            $fragment:)
-(:        }:)
-(:      </div>:)
-  
     
   for $line at $pos in $stringArray
 
