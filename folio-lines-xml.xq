@@ -174,7 +174,8 @@ for $result at $count in $sparql-result//sparql:result
       if ($doc/tei:TEI//tei:body//tei:pb[@ed=$initial_with_hash][@n=$surface_number_end]) then
         $doc/tei:TEI//tei:body//tei:pb[@ed=$initial_with_hash][@n=$surface_number_end]
       else
-        $doc/tei:TEI//tei:body//tei:pb[@ed=$initial_with_hash][@n=$surface_number_start]//following
+        (:  since there is no final lb break to close the fragment, we look for the last text node in the file :)
+        $doc/tei:TEI//tei:body//text()[last()]
     )
   let $make-fragment := true()
   let $display-root-namespace := true()
@@ -183,7 +184,12 @@ for $result at $count in $sparql-result//sparql:result
   let $current_offset := ($count * 200) + 10
 
   let $stringArray := local:getLineArray(normalize-space(string-join(local:render($node))))
-
+(:  return :)
+(:            $fragment:)
+(:        }:)
+(:      </div>:)
+  
+    
   for $line at $pos in $stringArray
 
     let $realPosition := $pos - 1
@@ -192,7 +198,7 @@ for $result at $count in $sparql-result//sparql:result
     where $pos != 1
     order by number($lineNumber)
     return
-      <line n="{$lineNumber}">
+      <line n="{$lineNumber}" fs="{$fs}">
       
         {
           for $word at $wordPosition in tokenize($line, " ")
