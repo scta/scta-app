@@ -180,9 +180,15 @@ for $result at $count in $sparql-result//sparql:result
   let $make-fragment := true()
   let $display-root-namespace := true()
   let $fragment := util:get-fragment-between($beginning-node, $ending-node, $make-fragment, $display-root-namespace)
-  let $node := fn:parse-xml($fragment)
-
+  (: clipping the fragment is a crazy way to make the fragment a valid xml string when there is no ending node
+     otherwise there is a duplication of the final three closing tags
+  :)
+  let $clippedFragment := replace($fragment, "</body>\s*</text>\s*</TEI>\s*</body>\s*</text>\s*</TEI>", "</body> </text> </TEI>")
+  let $node := fn:parse-xml($clippedFragment)
+(:    let $node := util:parse-html($fragment):)
   let $stringArray := local:getLineArray(normalize-space(string-join(local:render($node))))
+  return 
+      
     
   for $line at $pos in $stringArray
 
