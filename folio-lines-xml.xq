@@ -44,7 +44,7 @@ declare function local:recurse($node) {
 
 declare function local:getSparqlQuery($surface_id) as xs:string {
   let $query := xs:string('
-  SELECT ?surface_title ?next_surface_title ?manifestation_item ?short_id ?topLevelExpression_short_id ?canvas
+  SELECT ?surface_title ?next_surface_title ?next_surface ?manifestation_item ?short_id ?topLevelExpression_short_id ?canvas
     WHERE
     {
         <' || $surface_id || '> <http://scta.info/property/hasISurface> ?isurface .
@@ -108,8 +108,14 @@ for $result at $count in $sparql-result//sparql:result
   if the econding in lbp-schema 1.0 this won't work :)
   (: need a switch here to handle lbp-1.0 guidlines and 0.0 guidelines as well
   as cases where there are no column breaks and only page breaks :)
-  let $surface_title := $result//sparql:binding[@name="surface_title"]/sparql:literal/text()
-  let $next_surface_title := $result//sparql:binding[@name="next_surface_title"]/sparql:literal/text()
+  
+(:  let $surface_title := $result//sparql:binding[@name="surface_title"]/sparql:literal/text():)
+(: change here to use short id of surface instead of surface label :)
+  let $surface_title := tokenize($surface_id, "/")[last()]
+  
+(:  let $next_surface_title := $result//sparql:binding[@name="next_surface_title"]/sparql:literal/text() :)
+  (: change here to use short id of next_surface instead of next_surface label :)
+  let $next_surface_title := tokenize($result//sparql:binding[@name="next_surface"]/sparql:uri/text(), "/")[last()]
   let $schema := if ($doc/tei:TEI/tei:teiHeader[1]/tei:encodingDesc[1]/tei:schemaRef[1]/@n) then (
     string($doc/tei:TEI/tei:teiHeader[1]/tei:encodingDesc[1]/tei:schemaRef[1]/@n)
     )
@@ -187,7 +193,7 @@ for $result at $count in $sparql-result//sparql:result
   let $node := fn:parse-xml($clippedFragment)
 (:    let $node := util:parse-html($fragment):)
   let $stringArray := local:getLineArray(normalize-space(string-join(local:render($node))))
-  return 
+(:  return $next_surface_title:)
       
     
   for $line at $pos in $stringArray
