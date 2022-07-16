@@ -47,7 +47,7 @@ let $query := xs:string('
     return $query
 };
 
-declare function local:getAllCodices() as xs:string {
+declare function local:getAllCodices($codexType as xs:string) as xs:string {
     (: currently cannot get $expression_type_id passed into query string; so it is currently hard coded to librum1-prologus :)
 let $query := xs:string('
     SELECT ?codex ?codexTitle ?date
@@ -55,6 +55,7 @@ let $query := xs:string('
     {
         ?codex a <http://scta.info/resource/codex> .
         ?codex <http://purl.org/dc/elements/1.1/title> ?codexTitle .
+        ?codex <http://scta.info/property/codexType> <'  || $codexType || '>.
         OPTIONAL{
           ?codex <http://scta.info/property/publicationDate> ?date.
         }
@@ -63,7 +64,7 @@ let $query := xs:string('
     ')
     return $query
 };
-declare function local:getCodicesByAfterDate($date as xs:string) as xs:string {
+declare function local:getCodicesByAfterDate($date as xs:string, $codexType as xs:string) as xs:string {
     (: currently cannot get $expression_type_id passed into query string; so it is currently hard coded to librum1-prologus :)
 let $query := xs:string('
     SELECT ?codex ?codexTitle ?date
@@ -71,6 +72,7 @@ let $query := xs:string('
     {
         ?codex a <http://scta.info/resource/codex> .
         ?codex <http://purl.org/dc/elements/1.1/title> ?codexTitle .
+        ?codex <http://scta.info/property/codexType> <' || $codexType || '> .
         ?codex <http://scta.info/property/publicationDate> ?date .
         FILTER(?date >= "' || $date || '") .
     }
@@ -78,13 +80,14 @@ let $query := xs:string('
     ')
     return $query
 };
-declare function local:getAllCodicesByInstitution($institution as xs:string) as xs:string {
+declare function local:getAllCodicesByInstitution($institution as xs:string, $codexType as xs:string) as xs:string {
 let $query := xs:string('
     SELECT ?codex ?codexTitle
     WHERE
     {
         ?codex a <http://scta.info/resource/codex> .
         ?codex <http://purl.org/dc/elements/1.1/title> ?codexTitle .
+        ?codex <http://scta.info/property/codexType> <' || $codexType || '> .
         ?codex <http://scta.info/property/hasCanonicalCodexItem> ?icodex .
         ?icodex <http://scta.info/property/holdingInstitution> <http://scta.info/resource/' || $institution || '> .
     }
@@ -100,6 +103,7 @@ let $q := request:get-parameter('q', 'potest')
 let $codex := request:get-parameter('codex', '')
 let $institution := request:get-parameter('institution', '')
 let $afterDate := request:get-parameter('afterDate', '')
+let $codexType := request:get-parameter('codexType', 'http://scta.info/resource/codexTypeManuscript')
 let $searchuri := request:get-uri()
 (:let $searchuribase := "http://localhost:8080":)
 let $searchuribase := "https://exist.scta.info"
@@ -112,11 +116,11 @@ let $sparql := if ($codex != '') then
     (: add [1] here in case two codex identical codex parameters were passed     :)
     local:getCodex($codex[1])
   else if ($institution) then
-    local:getAllCodicesByInstitution($institution)
+    local:getAllCodicesByInstitution($institution, $codexType)
   else if ($afterDate) then
-    local:getCodicesByAfterDate($afterDate)
+    local:getCodicesByAfterDate($afterDate, $codexType)
   else
-    local:getAllCodices()
+    local:getAllCodices($codexType)
 
 
 let $encoded-sparql := encode-for-uri($sparql)
