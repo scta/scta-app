@@ -18,21 +18,13 @@ declare function local:removePunctation($string) {
 
 declare function local:getSparqlQuery($tid) as xs:string {
     let $query := xs:string("
-        SELECT ?path ?itemShortId ?topLevelShortId ?passageType
+        SELECT ?path ?itemShortId ?topLevelShortId
         WHERE
         {
             <" || $tid || "> <http://scta.info/property/hasDocument> ?path . 
             <" || $tid || "> <http://scta.info/property/isTranscriptionOf> ?m . 
             ?m <http://scta.info/property/isManifestationOf> ?e .
-            ?e <http://scta.info/property/structureType> ?passageType .
-            {
             ?e <http://scta.info/property/isPartOfStructureItem> ?item . 
-            }
-            UNION
-            {
-            ?e <http://scta.info/property/isPartOfStructureBlock> ?block . 
-            ?block <http://scta.info/property/isPartOfStructureItem> ?item . 
-            }
             ?item <http://scta.info/property/shortId> ?itemShortId .
             ?e <http://scta.info/property/isPartOfTopLevelExpression> ?topLevel .
             ?topLevel <http://scta.info/property/shortId> ?topLevelShortId . 
@@ -63,21 +55,6 @@ declare function local:render($node){
         default return local:recurse($node)
 };
 
-declare function local:renderQuote($node){
-    typeswitch($node)
-        case text() return concat(local:removePunctation($node), ' ')
-        case element(tei:quote) return <p>{local:recurse($node)}</p>
-        case element(tei:title) return local:recurse($node)
-        case element(tei:name) return local:recurse($node)
-        case element(tei:rdg) return ()
-        case element(tei:orig) return ()
-        case element(tei:bibl) return ()
-        case element (tei:note) return ()
-        case element (tei:lb) return(<span n="{$node/@n}" type="line" break="{$node/@break}" page="{$node/preceding::tei:pb[1]/@n}"/>)
-        case element (tei:pb) return(<span n="{$node/@n}" type="page"/>)
-        default return local:recurse($node)
-};
-
 declare function local:getTokenPosition($node, $precedingpb as xs:string){
     let $totalNodes := $node//node()
         
@@ -86,11 +63,7 @@ declare function local:getTokenPosition($node, $precedingpb as xs:string){
     for $token at $position in $totalNodes
     let $list := 
                 let $lineTextTokens := tokenize($totalNodes[$position])
-
- : (:                let $pbNum := if ($totalNodes[$position - 1]/@page) then ($totalNodes[$position - 1]/@page) else ($precedingpb):)
- (: pb injection not working so conditional below just looks for the page number for the next line if it can't find it: this will work in most cases but not when the first line is on a different page:)
-                let $pbNum := if ($totalNodes[$position - 1]/@page) then ($totalNodes[$position - 1]/@page) else ($totalNodes[$position+1]/@page)
-                
+                let $pbNum := if ($totalNodes[$position - 1]/@page) then ($totalNodes[$position - 1]/@page) else ($precedingpb)
                 let $lbNum := if ($totalNodes[$position - 1]/@n) then ($totalNodes[$position - 1]/@n) else ($totalNodes[$position + 1]/@n - 1)
                 where (not($token/@n))
                 for $word at $position2 in $lineTextTokens
@@ -119,30 +92,18 @@ let $sparql-result := http:send-request(
    </http:request>
 )
 let $path := $sparql-result//sparql:result[1]/sparql:binding[@name="path"]/sparql:uri/text()
-let $passageType := $sparql-result//sparql:result[1]/sparql:binding[@name="passageType"]/sparql:uri/text()
 let $pathFragments := tokenize(tokenize($path, "/scta-texts/")[2], '/')
 let $fileName := tokenize($pathFragments[5], "#")[1]
 let $pxmlid := tokenize($pathFragments[5], "#")[2]
 let $cid := $sparql-result//sparql:result[1]/sparql:binding[@name="topLevelShortId"]/sparql:literal/text()
 let $docpath := "/db/apps/scta-data/" || $cid || "/" || $pathFragments[4] || "/" || $fileName
-(:let $transcription := doc($docpath)//tei:p[@xml:id=$pxmlid]:)
-let $transcription := doc($docpath)//node()[@xml:id=$pxmlid]
+let $transcription := doc($docpath)//tei:p[@xml:id=$pxmlid]
 (: preceding expath doesn't seem to be able to get starts on pb; so if no pb is found in text, the else statement goes directly to the starts on div and gets the pb:)
-let $precedingpb := if (doc($docpath)//node()[@xml:id=$pxmlid]//preceding::tei:pb[1]/@n) then 
-    (doc($docpath)//node()[@xml:id=$pxmlid]//preceding::tei:pb[1]/@n)
+let $precedingpb := if (doc($docpath)//tei:p[@xml:id=$pxmlid]//preceding::tei:pb[1]/@n) then 
+    (doc($docpath)//tei:p[@xml:id=$pxmlid]//preceding::tei:pb[1]/@n)
     else(
         doc($docpath)//tei:div[@xml:id='starts-on']/tei:pb/@n
         )
-(:return local:render($pxmlid):)
-(:return $sparql-result:)
-return 
-    if ($passageType eq "http://scta.info/resource/structureElement") then 
-        (
-        local:getTokenPosition(local:renderQuote($transcription), $precedingpb)
-    )
-    else(
-        local:getTokenPosition(local:render($transcription), $precedingpb)
-    )
-
-
+(:return local:render($transcription):)
+return local:getTokenPosition(local:render($transcription), $precedingpb)
 
