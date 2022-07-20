@@ -87,7 +87,7 @@ declare function local:getTokenPosition($node, $precedingpb as xs:string){
     let $list := 
                 let $lineTextTokens := tokenize($totalNodes[$position])
 
- : (:                let $pbNum := if ($totalNodes[$position - 1]/@page) then ($totalNodes[$position - 1]/@page) else ($precedingpb):)
+  (:                let $pbNum := if ($totalNodes[$position - 1]/@page) then ($totalNodes[$position - 1]/@page) else ($precedingpb):)
  (: pb injection not working so conditional below just looks for the page number for the next line if it can't find it: this will work in most cases but not when the first line is on a different page:)
                 let $pbNum := if ($totalNodes[$position - 1]/@page) then ($totalNodes[$position - 1]/@page) else ($totalNodes[$position+1]/@page)
                 
