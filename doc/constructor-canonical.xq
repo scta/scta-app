@@ -8,7 +8,7 @@ import module namespace http = "http://expath.org/ns/http-client" at "/http-clie
 
 declare function local:getSparqlQuery($expression_id as xs:string) as xs:string {
   let $query := xs:string('
-  SELECT ?type ?item ?topLevelTranscription ?level ?author ?authorTitle ?title ?wikiDataId
+  SELECT ?type ?item ?topLevelTranscription ?level ?author ?authorTitle ?title ?wikiDataId ?itemTitle 
   WHERE
   {
       <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/structureType> ?type .
@@ -19,6 +19,7 @@ declare function local:getSparqlQuery($expression_id as xs:string) as xs:string 
       {
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/level> ?level .
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/hasStructureItem> ?eitem .
+        ?eitem <http://scta.info/property/longTitle> ?itemTitle .
         ?eitem <http://scta.info/property/hasCanonicalManifestation> ?mitem .
         ?mitem <http://scta.info/property/hasCanonicalTranscription> ?item .
         ?eitem <http://scta.info/property/totalOrderNumber>	?totalOrder .
@@ -32,6 +33,7 @@ declare function local:getSparqlQuery($expression_id as xs:string) as xs:string 
         ?topLevel <http://www.loc.gov/loc.terms/relators/AUT> ?author .
         ?author <http://purl.org/dc/elements/1.1/title> ?authorTitle .
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/hasStructureItem> ?eitem .
+        ?eitem <http://scta.info/property/longTitle> ?itemTitle .
         ?eitem <http://scta.info/property/hasCanonicalManifestation> ?mitem .
         ?mitem <http://scta.info/property/hasCanonicalTranscription> ?item .
         ?eitem <http://scta.info/property/totalOrderNumber>	?totalOrder .
@@ -41,6 +43,7 @@ declare function local:getSparqlQuery($expression_id as xs:string) as xs:string 
       OPTIONAL
       {
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/isPartOfStructureItem> ?eitem .
+        ?eitem <http://scta.info/property/longTitle> ?itemTitle .
         ?eitem <http://scta.info/property/hasCanonicalManifestation> ?mitem .
         ?mitem <http://scta.info/property/hasCanonicalTranscription> ?item .
         ?eitem <http://scta.info/property/totalOrderNumber>	?totalOrder .
@@ -53,6 +56,7 @@ declare function local:getSparqlQuery($expression_id as xs:string) as xs:string 
       {
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/isPartOfStructureBlock> ?block .
         ?block <http://scta.info/property/isPartOfStructureItem> ?eitem .
+        ?eitem <http://scta.info/property/longTitle> ?itemTitle .
         ?eitem <http://scta.info/property/hasCanonicalManifestation> ?mitem .
         ?mitem <http://scta.info/property/hasCanonicalTranscription> ?item .
         ?eitem <http://scta.info/property/totalOrderNumber>	?totalOrder .
@@ -64,6 +68,7 @@ declare function local:getSparqlQuery($expression_id as xs:string) as xs:string 
       OPTIONAL
       {
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/isPartOfTopLevelExpression> ?topLevel .
+        <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/longTitle> ?itemTitle .
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/hasCanonicalManifestation> ?mitem .
         ?mitem <http://scta.info/property/hasCanonicalTranscription> ?item .
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/totalOrderNumber>	?totalOrder .
@@ -143,6 +148,7 @@ return
               fn:tokenize($expression_id, "/")
 
         let $itemid := $url-array[1]
+        let $itemTitle := $result/sparql:binding[@name="itemTitle"]/sparql:literal/text()
         let $fileid := if ($url-array = "critical") then $url-array[1] else concat($url-array[2], "_", $url-array[1])
         let $url-cid-array := fn:tokenize(substring-after($result/sparql:binding[@name="topLevel"]/sparql:uri/text(), "/resource/"), "/")
         let $cid := $url-cid-array[1]
@@ -157,6 +163,8 @@ return
           else
             doc(concat('/db/apps/scta-data/', $cid, '/', $itemid, '/', $fileid, '.xml'))
 
+        
+        
         let $div :=
           if ($type eq "structureCollection") then
             $doc/tei:TEI/tei:text/tei:body/tei:div
@@ -164,9 +172,14 @@ return
             $doc/tei:TEI/tei:text/tei:body/tei:div
           else
             $doc/tei:TEI/tei:text/tei:body//*[@xml:id=$expression_short_id]
-
+          
           return
-            $div
+              
+              <div xml:id="{$itemid}-wrapper">
+              <head>{$itemTitle}</head>
+              {$div}
+              </div>
+            
 
       }
       </body>
