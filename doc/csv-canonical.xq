@@ -73,7 +73,7 @@ declare function local:recurse($node, $show_quote, $show_pct) {
 
 declare function local:getSparqlQuery($expression_id as xs:string) as xs:string {
   let $query := xs:string('
-  SELECT ?type ?item ?topLevelTranscription ?level ?author ?authorTitle ?title ?wikiDataId ?itemTitle 
+  SELECT ?type ?item ?topLevelTranscription ?level ?title ?wikiDataId ?itemTitle 
   WHERE
   {
       <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/structureType> ?type .
@@ -88,21 +88,16 @@ declare function local:getSparqlQuery($expression_id as xs:string) as xs:string 
         ?eitem <http://scta.info/property/hasCanonicalManifestation> ?mitem .
         ?mitem <http://scta.info/property/hasCanonicalTranscription> ?item .
         ?eitem <http://scta.info/property/totalOrderNumber>	?totalOrder .
-        <http://scta.info/resource/' || $expression_id || '> <http://www.loc.gov/loc.terms/relators/AUT> ?author .
-        ?author <http://purl.org/dc/elements/1.1/title> ?authorTitle .
       }
       #option for non top level collection
       OPTIONAL
       {
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/isPartOfTopLevelExpression> ?topLevel .
-        ?topLevel <http://www.loc.gov/loc.terms/relators/AUT> ?author .
-        ?author <http://purl.org/dc/elements/1.1/title> ?authorTitle .
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/hasStructureItem> ?eitem .
         ?eitem <http://scta.info/property/longTitle> ?itemTitle .
         ?eitem <http://scta.info/property/hasCanonicalManifestation> ?mitem .
         ?mitem <http://scta.info/property/hasCanonicalTranscription> ?item .
         ?eitem <http://scta.info/property/totalOrderNumber>	?totalOrder .
-        
       }
       # option for division or block 
       OPTIONAL
@@ -113,8 +108,6 @@ declare function local:getSparqlQuery($expression_id as xs:string) as xs:string 
         ?mitem <http://scta.info/property/hasCanonicalTranscription> ?item .
         ?eitem <http://scta.info/property/totalOrderNumber>	?totalOrder .
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/isPartOfTopLevelExpression> ?topLevel .
-        ?topLevel <http://www.loc.gov/loc.terms/relators/AUT> ?author .
-        ?author <http://purl.org/dc/elements/1.1/title> ?authorTitle .
       }
       # option for element
       OPTIONAL
@@ -126,8 +119,6 @@ declare function local:getSparqlQuery($expression_id as xs:string) as xs:string 
         ?mitem <http://scta.info/property/hasCanonicalTranscription> ?item .
         ?eitem <http://scta.info/property/totalOrderNumber>	?totalOrder .
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/isPartOfTopLevelExpression> ?topLevel .
-        ?topLevel <http://www.loc.gov/loc.terms/relators/AUT> ?author .
-        ?author <http://purl.org/dc/elements/1.1/title> ?authorTitle .
       }
       #option for structureItem
       OPTIONAL
@@ -137,12 +128,6 @@ declare function local:getSparqlQuery($expression_id as xs:string) as xs:string 
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/hasCanonicalManifestation> ?mitem .
         ?mitem <http://scta.info/property/hasCanonicalTranscription> ?item .
         <http://scta.info/resource/' || $expression_id || '> <http://scta.info/property/totalOrderNumber>	?totalOrder .
-        ?topLevel <http://www.loc.gov/loc.terms/relators/AUT> ?author .
-        ?author <http://purl.org/dc/elements/1.1/title> ?authorTitle .
-      }
-      OPTIONAL{
-        ?author <http://www.w3.org/2002/07/owl#sameAs> ?wikiDataId .
-        FILTER ( strstarts(str(?wikiDataId), "http://www.wikidata.org") ) .
       }
   }
   ORDER BY ?totalOrder
