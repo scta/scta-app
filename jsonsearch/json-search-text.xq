@@ -93,6 +93,7 @@ let $wgid := request:get-parameter('wgid', '')
 let $eid := request:get-parameter('eid', '')
 let $aid := request:get-parameter('aid', '')
 let $etid := request:get-parameter('etid', '')
+let $offset := number(request:get-parameter('offset', '1'))
 let $searchType := request:get-parameter('searchType', 'text')
 let $url := "http://sparql-docker.scta.info/ds/query?query=",
 $sparql := local:getSparqlQuery($wgid, $etid, $aid, $eid),
@@ -133,7 +134,7 @@ $sparql-result := http:send-request(
                     )
                 )
                 else (
-                    subsequence($combinedDocs//tei:p[ft:query(., $query)], 1, 10)
+                    subsequence($combinedDocs//tei:p[ft:query(., $query)], $offset, 10)
                 )
             )
         else ()
