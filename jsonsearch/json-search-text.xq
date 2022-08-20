@@ -122,28 +122,45 @@ $sparql-result := http:send-request(
             return 
                 doc($doc)
     let $query := request:get-parameter('query', '')
-    let $allHits := if ($query != '') 
+    let $hits := if ($query != '') 
         then (
             if ($searchType eq "figure") then 
                 (
                     if ($query eq 'all') then(
-                        $combinedDocs//tei:figure
+                        subsequence($combinedDocs//tei:figure, $offset, 20)
                     )   
                     else(
-                        $combinedDocs//tei:figure[ft:query(., $query)]
+                        subsequence($combinedDocs//tei:figure[ft:query(., $query)], $offset, 20)
                     )
                 )
                 else (
-                    subsequence($combinedDocs//tei:p[ft:query(., $query)], $offset, 10)
+                    subsequence($combinedDocs//tei:p[ft:query(., $query)], $offset, 20)
+                )
+            )
+        else ()
+    let $nextHits := if ($query != '') 
+        then (
+            if ($searchType eq "figure") then 
+                (
+                    if ($query eq 'all') then(
+                        subsequence($combinedDocs//tei:figure, $offset + 20, 20)
+                    )   
+                    else(
+                        subsequence($combinedDocs//tei:figure[ft:query(., $query)], $offset + 20, 20)
+                    )
+                )
+                else (
+                    subsequence($combinedDocs//tei:p[ft:query(., $query)], $offset + 20, 20)
                 )
             )
         else ()
     
-    let $hits := $allHits
+    let $moreResults := if (count($nextHits) > 0) then "true" else "false"
+    
 return 
     
 map {
-    "totalCount": count($allHits),
+    "totalCount": count($hits),
     "results": 
 
         for $hit at $index in $hits
@@ -162,7 +179,8 @@ map {
                 "id": $figureid,
                 "pid": $pid,
                 "index": $index,
-                "imgurl": $imgurl
+                "imgurl": $imgurl,
+                "moreResults": $moreResults
                 }
                 )
                 else (
@@ -179,7 +197,8 @@ map {
                     "end": $precedingCount/end/text(),
                     "hit": normalize-space(jssearchutils:render(util:expand($item/span[@class='hi']))),
                     "previous": normalize-space(jssearchutils:render(util:expand($item/span[@class='previous']))),
-                    "next": normalize-space(jssearchutils:render(util:expand($item/span[@class='following'])))
+                    "next": normalize-space(jssearchutils:render(util:expand($item/span[@class='following']))),
+                    "moreResults": $moreResults
                     }
                 )
                 
