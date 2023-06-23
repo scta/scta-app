@@ -166,6 +166,8 @@ map {
         for $hit at $index in $hits
 
             let $pid := $hit/@xml:id/string()
+            (:   retrieve itemid of it from item div id         :)
+            let $hitItemid := $hit/ancestor::tei:body/tei:div/@xml:id/string()
             order by ft:score($hit) descending
             return
                 if ($searchType eq "figure") then (
@@ -192,6 +194,7 @@ map {
                 return 
                     map{
                     "pid": $pid,
+                    "itemid": $hitItemid,
                     "index": $index,
                     "start": $precedingCount/start/text(),
                     "end": $precedingCount/end/text(),
