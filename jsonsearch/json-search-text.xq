@@ -11,7 +11,6 @@ declare option output:media-type "application/json";
 
 import module namespace http = "http://expath.org/ns/http-client" at "/http-client/http-client.xq";
 
-
 declare function local:getSparqlQuery($wgid, $etid, $aid, $eid) as xs:string {
     (: currently cannot get $expression_type_id passed into query string; so it is currently hard coded to librum1-prologus :)
     let $etid_uri := "<http://scta.info/resource/" || $etid || ">"

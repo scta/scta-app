@@ -9,8 +9,9 @@ import module namespace http = "http://expath.org/ns/http-client" at "/http-clie
 
 declare function local:removePunctation($string) {
     let $clean := replace($string, '\s+([^\p{L}|\p{N}|\p{P}]+)', '$1')
-    let $clean2 := replace($clean, '\s+', ' ')
-    return $clean2
+    let $clean2 := replace($clean, '¶|/', '')
+    let $clean3 := replace($clean2, '\s+', ' ')
+    return $clean3
 };
 
 declare function local:render($node) {
