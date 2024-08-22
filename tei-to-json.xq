@@ -22,8 +22,34 @@ import module namespace http = "http://expath.org/ns/http-client" at "/http-clie
  : 
  :  :)
 
+(: this function removes pb cb and lb from the xml doc before converting to json
+ : it's not ideal to be losing this data, but when elements occur within a word it is breaking the word into two pieces making it hard 
+ : to get a correct word range count
+ : 
+ : an in a way we don't need lb, cb, pb info because we should know those from the word or word range that has been selected 
+ : 
+ : so far it seems to be working but its a little fragile
+ : :)
+declare function local:remove-lb($node as node()) as node() {
+    typeswitch ($node)
+        case element() return
+            element { name($node) } {
+                $node/@*,  (: Retain all attributes :)
+                for $child in $node/node()
+                return
+                    if (matches($child/name(), '^(lb|cb|pb)$')) then ()
+(:                    else if ($child instance of text() and $child/preceding-sibling::node()[1]/name() = 'lb') then:)
+(:                        concat($child/preceding-sibling::text()[1], $child):)
+                    else
+                        local:remove-lb($child)
+            }
+        case text() return $node
+        default return $node
+};
+
 
 declare function local:jsonify($nodes) {
+    
     array {
         for $node in $nodes
         return
@@ -172,8 +198,11 @@ $sparql-result := http:send-request(
              else
                  $cid
 
-
-        let $jsondoc := local:jsonify($div)
+        (: Remove all <lb> elements and concatenate text nodes :)
+        let $cleanedDiv := local:remove-lb($div)
+(:        let $cleanedDiv := $div:)
+        
+        let $jsondoc := local:jsonify($cleanedDiv)
         return $jsondoc
 
 
