@@ -61,7 +61,12 @@ declare function local:replaceCollection($owner, $repo, $access_token) {
 declare function local:files($before, $after, $owner, $repo, $access_token){
 
   let $url := "https://api.github.com/repos/" || $owner ||"/" || $repo || "/compare/" || $before ||"..." || $after || "?access_token=" || $access_token
-  let $request := <http:request method="GET" href="{$url}" timeout="1000"/>
+  (:  added user agent and accept because github seem to be blocking the request without it:)
+  let $request := <http:request method="GET" href="{$url}" timeout="1000"
+  >
+        <http:header name="User-Agent" value="existdb-script"/>
+        <http:header name="Accept" value="application/vnd.github.v3+json"/>
+    </http:request>
   let $response := http:send-request($request)
   let $shortid := $repo
   let $top_level_collection := local:topLevelCollectionQuery($shortid)
