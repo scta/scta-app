@@ -35,10 +35,12 @@ import module namespace http = "http://expath.org/ns/http-client" at "/http-clie
 
 
 declare function local:removePunctation($string, $show_pct) {
+    let $with_et := replace($string, '&amp;', 'et')
+    
     let $clean := if ($show_pct eq 'true') then
-        replace($string, '\s+([^\p{L}|\p{N}|\p{P}]+)', '$1')
+        replace($with_et, '\s+([^\p{L}|\p{N}|\p{P}]+)', '$1')
     else
-        replace($string, '[^\p{L}|\p{N}]+', ' ')
+        replace($with_et, '[^\p{L}|\p{N}]+', ' ')
     let $clean2 := replace($clean, '\s+', ' ')
     return $clean2
 };
