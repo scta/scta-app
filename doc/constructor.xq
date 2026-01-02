@@ -8,7 +8,7 @@ import module namespace http = "http://expath.org/ns/http-client" at "/http-clie
 
 declare function local:getSparqlQuery($transcription_id as xs:string) as xs:string {
   let $query := xs:string('
-  SELECT ?type ?item ?topLevelTranscription ?level
+  SELECT ?type ?item ?topLevelTranscription ?level ?itemOrder
   WHERE
   {
       <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/structureType> ?type .
@@ -18,17 +18,26 @@ declare function local:getSparqlQuery($transcription_id as xs:string) as xs:stri
       {
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/level> ?level .
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/hasStructureItem> ?item .
+        ?item <http://scta.info/property/isTranscriptionOf> ?mitem .
+        ?mitem <http://scta.info/property/isManifestationOf> ?eitem .
+        ?eitem <http://scta.info/property/totalOrderNumber> ?itemOrder . 
       }
       #option for non top level collection
       OPTIONAL
       {
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/hasStructureItem> ?item .
+        ?item <http://scta.info/property/isTranscriptionOf> ?mitem .
+        ?mitem <http://scta.info/property/isManifestationOf> ?eitem .
+        ?eitem <http://scta.info/property/totalOrderNumber> ?itemOrder .  
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfTopLevelTranscription> ?topLevelTranscription .
       }
       # option for division or block 
       OPTIONAL
       {
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfStructureItem> ?item .
+        ?item <http://scta.info/property/isTranscriptionOf> ?mitem .
+        ?mitem <http://scta.info/property/isManifestationOf> ?eitem .
+        ?eitem <http://scta.info/property/totalOrderNumber> ?itemOrder .    
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfTopLevelTranscription> ?topLevelTranscription .
       }
       # option for element
@@ -36,14 +45,21 @@ declare function local:getSparqlQuery($transcription_id as xs:string) as xs:stri
       {
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfStructureBlock> ?block .
         ?block <http://scta.info/property/isPartOfStructureItem> ?item .
+        ?item <http://scta.info/property/isTranscriptionOf> ?mitem .
+        ?mitem <http://scta.info/property/isManifestationOf> ?eitem .
+        ?eitem <http://scta.info/property/totalOrderNumber> ?itemOrder .   
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfTopLevelTranscription> ?topLevelTranscription .
       }
       #option for structureItem
       OPTIONAL
       {
         <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isPartOfTopLevelTranscription> ?topLevelTranscription .
+        <http://scta.info/resource/' || $transcription_id || '> <http://scta.info/property/isTranscriptionOf> ?mitem .
+        ?mitem <http://scta.info/property/isManifestationOf> ?eitem .
+        ?eitem <http://scta.info/property/totalOrderNumber> ?itemOrder .  
       }
   }
+  ORDER BY ?itemOrder
     ')
     return $query
 };
